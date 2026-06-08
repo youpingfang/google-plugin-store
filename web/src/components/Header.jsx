@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Puzzle, Plus, LayoutDashboard, X, Menu, Shield, LogOut } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, X, Menu, Shield, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import AuthModal from './AuthModal';
 import ThemeToggle from './ThemeToggle';
@@ -75,7 +75,12 @@ function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
             <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <Puzzle className="w-5 h-5 text-white" />
+              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" stroke="none" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.4" stroke="none" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.4" stroke="none" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" stroke="none" />
+              </svg>
             </div>
             <span className="text-lg font-bold text-text-primary hidden sm:block">Plugin Store</span>
           </Link>
