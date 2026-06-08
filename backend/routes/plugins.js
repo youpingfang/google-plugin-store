@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getPlugins, getPluginById, savePlugin, deletePlugin, recordInstall } from '../services/storage.js';
 import { processPluginZip } from '../services/converter.js';
+import { requireAdmin } from '../services/auth.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { getPackagesDir } from '../services/storage.js';
@@ -71,8 +72,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create plugin
-router.post('/', async (req, res) => {
+// Create plugin (admin only)
+router.post('/', requireAdmin, async (req, res) => {
   try {
     const { name, author, version, category, shortDescription, description, githubRepo } = req.body;
     
@@ -116,8 +117,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update plugin
-router.put('/:id', async (req, res) => {
+// Update plugin (admin only)
+router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const existing = await getPluginById(req.params.id);
     if (!existing) {
@@ -133,8 +134,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete plugin
-router.delete('/:id', async (req, res) => {
+// Delete plugin (admin only)
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const success = await deletePlugin(req.params.id);
     if (!success) {

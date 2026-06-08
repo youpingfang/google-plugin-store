@@ -6,6 +6,7 @@ import { readFile } from 'fs/promises';
 import pluginsRouter from './routes/plugins.js';
 import githubRouter from './routes/github.js';
 import uploadRouter from './routes/upload.js';
+import authRouter from './routes/auth.js';
 import { initStorage } from './services/storage.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,6 +63,7 @@ app.use('/packages', async (req, res, next) => {
 app.use('/api/plugins', pluginsRouter);
 app.use('/api/github', githubRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/auth', authRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

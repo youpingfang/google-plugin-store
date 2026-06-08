@@ -2,12 +2,14 @@ import { Router } from 'express';
 import { detectGitHubRepo, downloadGitHubRepo, extractManifestFromGitHubZip } from '../services/github.js';
 import { processGitHubPlugin } from '../services/converter.js';
 import { savePlugin } from '../services/storage.js';
+import { requireAdmin } from '../services/auth.js';
 import fs from 'fs-extra';
 import path from 'path';
 
 const router = Router();
 
-// Detect GitHub repo and get manifest info
+// Detect is read-only metadata — keep open so the form can prefill before login.
+// (The actual import below is gated.)
 router.post('/detect', async (req, res) => {
   try {
     const { repoUrl, token } = req.body;
@@ -24,8 +26,8 @@ router.post('/detect', async (req, res) => {
   }
 });
 
-// Import plugin from GitHub
-router.post('/import', async (req, res) => {
+// Import plugin from GitHub (admin only)
+router.post('/import', requireAdmin, async (req, res) => {
   try {
     const { repoUrl, token, category, shortDescription } = req.body;
     

@@ -7,9 +7,54 @@ and the root `VERSION` is bumped with each user-facing release.
 ## [Unreleased]
 
 ### Planned
-- GitHub OAuth authentication for `POST /api/upload/*` and `POST /api/github/import`
-  (admin allowlist via `ADMIN_GITHUB_USERS` env var)
+- Full GitHub OAuth App flow (browser redirect) once `GITHUB_CLIENT_ID` /
+  `GITHUB_CLIENT_SECRET` are set — current build uses GitHub PAT login
 - Per-user developer dashboard
+
+## [1.3.0] - 2026-06-08
+
+### Security
+- **Admin authentication required for all write operations.** New
+  `POST /api/auth/login` exchanges a GitHub Personal Access Token
+  (scoped to `read:user`) for a short-lived JWT (7d, configurable via
+  `JWT_TTL`).
+- The set of GitHub usernames allowed to administer the store is
+  controlled by the `ADMIN_GITHUB_USERS` env var (comma-separated).
+- Endpoints now gated with `requireAdmin`:
+  - `POST /api/plugins`, `PUT /api/plugins/:id`, `DELETE /api/plugins/:id`
+  - `POST /api/upload/icon`, `/screenshot`, `/package`
+  - `POST /api/github/import`
+- Public endpoints (intentionally left open):
+  - `GET /api/plugins*`, `GET /api/plugins/:id`
+  - `POST /api/plugins/:id/install` (user-facing install counter)
+  - `GET /api/auth/me` (with valid JWT)
+  - `POST /api/github/detect` (read-only metadata for prefill)
+
+### Added
+- `backend/services/auth.js` — JWT signing, GitHub PAT verification,
+  `requireAuth` / `requireAdmin` middlewares
+- `backend/routes/auth.js` — `/login`, `/me`, `/logout`
+- `web/src/hooks/useAuth.jsx` — `AuthProvider` + `useAuth` context
+  (validates stored token on mount, exposes `user` / `isAdmin` /
+  `login` / `logout`)
+- `web/src/components/LoginModal.jsx` — token entry dialog with
+  inline instructions for getting a GitHub PAT
+- `web/src/components/Header.jsx` — user pill + dropdown menu,
+  login button replaces the action button when not authenticated
+- `web/src/pages/Developer.jsx` — auth gate: full-page login screen
+  when not admin, otherwise the existing dashboard
+- `web/src/api/index.js` — auto-attaches `Authorization: Bearer <jwt>`
+  on every request, including multipart uploads
+
+### Dependencies
+- backend: `passport`, `passport-github2`, `jsonwebtoken`,
+  `express-session`, `cookie-session`
+
+### Environment variables (new)
+- `ADMIN_GITHUB_USERS` (required to enable login) — comma-separated
+  GitHub logins allowed to write
+- `JWT_SECRET` (required in production) — signing key for JWT
+- `JWT_TTL` (optional, default `7d`) — token lifetime
 
 ## [1.2.0] - 2026-06-08
 

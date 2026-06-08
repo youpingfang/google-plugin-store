@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Puzzle, Plus, LayoutDashboard, X, Menu } from 'lucide-react';
+import { Search, Puzzle, Plus, LayoutDashboard, X, Menu, Shield, LogOut } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth.jsx';
+import LoginModal from './LoginModal';
 
 const CATEGORIES = [
   { id: 'all', name: '全部' },
@@ -14,9 +16,13 @@ function Header({ activeCategory, onCategoryChange }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   // Handle keyboard shortcut (Cmd/Ctrl + K)
   useEffect(() => {
@@ -47,6 +53,24 @@ function Header({ activeCategory, onCategoryChange }) {
   };
 
   const isDeveloperPage = location.pathname === '/developer';
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [userMenuOpen]);
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    if (isDeveloperPage) navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
@@ -102,17 +126,65 @@ function Header({ activeCategory, onCategoryChange }) {
                   <LayoutDashboard className="w-4 h-4" />
                   <span>开发者</span>
                 </Link>
-                <Link
-                  to="/developer?action=add"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                           bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
-                           transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">提交插件</span>
-                </Link>
+                {isAdmin ? (
+                  <Link
+                    to="/developer?action=add"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                             bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                             transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">提交插件</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setLoginOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                             bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                             transition-all hover:-translate-y-0.5 active:translate-y-0"
+                    title="需要管理员登录"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span className="hidden sm:inline">提交插件</span>
+                  </button>
+                )}
               </>
             )}
+
+            {/* User pill (when logged in) */}
+            {user && (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-surface transition-colors"
+                  title={user.login}
+                >
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.login} className="w-7 h-7 rounded-full ring-1 ring-border" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold">
+                      {user.login?.[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-xl shadow-lg py-2 animate-fadeIn">
+                    <div className="px-4 py-2 border-b border-border">
+                      <div className="text-sm font-semibold text-text-primary">{user.name || user.login}</div>
+                      <div className="text-xs text-text-secondary">@{user.login}</div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-danger transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      登出
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -178,6 +250,8 @@ function Header({ activeCategory, onCategoryChange }) {
         </div>
       )}
     </header>
+
+    <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
   );
 }
 

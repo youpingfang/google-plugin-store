@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getPackagesDir, getPluginById, savePlugin } from '../services/storage.js';
 import { processPluginZip } from '../services/converter.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = Router();
 
@@ -25,8 +26,9 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 } // 100MB
 });
 
-// Upload icon
-router.post('/icon', upload.single('file'), async (req, res) => {
+// Upload icon (admin only). requireAdmin must come BEFORE multer so
+// unauthorized requests don't waste disk space on _temp/.
+router.post('/icon', requireAdmin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -50,8 +52,8 @@ router.post('/icon', upload.single('file'), async (req, res) => {
   }
 });
 
-// Upload screenshot
-router.post('/screenshot', upload.single('file'), async (req, res) => {
+// Upload screenshot (admin only)
+router.post('/screenshot', requireAdmin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -76,8 +78,8 @@ router.post('/screenshot', upload.single('file'), async (req, res) => {
   }
 });
 
-// Upload plugin package (ZIP)
-router.post('/package', upload.single('file'), async (req, res) => {
+// Upload plugin package (ZIP) (admin only)
+router.post('/package', requireAdmin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Plus, Github, Settings, 
   Upload, Search, Trash2, Edit, ChevronDown, X, Loader2,
-  AlertCircle, CheckCircle, ExternalLink
+  AlertCircle, CheckCircle, ExternalLink, Shield
 } from 'lucide-react';
 import { api } from '../api';
+import { useAuth } from '../hooks/useAuth.jsx';
+import LoginModal from '../components/LoginModal';
 
 // Gradients for placeholder icons
 const PLACEHOLDER_GRADIENTS = [
@@ -59,6 +61,11 @@ function Developer() {
 
   // Notifications
   const [notification, setNotification] = useState(null);
+
+  // Auth gating
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadPlugins();
@@ -180,6 +187,49 @@ function Developer() {
   const avgRating = plugins.length > 0 
     ? (plugins.reduce((sum, p) => sum + (p.rating || 0), 0) / plugins.length).toFixed(1)
     : '0.0';
+
+  // Auth gate
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-surface">
+        <div className="max-w-md mx-auto pt-24 px-4">
+          <div className="bg-white rounded-2xl border border-border p-8 text-center">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold text-text-primary mb-2">需要管理员登录</h2>
+            <p className="text-sm text-text-secondary mb-6">
+              提交插件、修改、删除插件都需要管理员身份。使用你的 GitHub Personal Access Token 登录。
+            </p>
+            <button
+              onClick={() => setLoginOpen(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5
+                       bg-primary text-white font-medium rounded-lg
+                       hover:bg-primary-hover transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+              登录
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="w-full mt-2 px-4 py-2 text-sm text-text-secondary
+                       hover:text-text-primary transition-colors"
+            >
+              返回首页
+            </button>
+          </div>
+        </div>
+        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface">
