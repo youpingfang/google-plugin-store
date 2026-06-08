@@ -118,4 +118,10 @@ export const api = {
   login: (token) => request('/auth/login', { method: 'POST', body: JSON.stringify({ token }) }),
   me: () => request('/auth/me'),
   logout: () => request('/auth/logout', { method: 'POST' }),
+
+  // Email + password flow
+  setupStatus: () => request('/auth/setup-status'),
+  register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  loginPassword: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  githubLogin: (token) => request('/auth/github', { method: 'POST', body: JSON.stringify({ token }) }),
 };

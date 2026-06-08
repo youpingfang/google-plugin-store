@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { api } from '../api';
 import { useAuth } from '../hooks/useAuth.jsx';
-import LoginModal from '../components/LoginModal';
+import AuthModal from '../components/AuthModal';
 
 // Gradients for placeholder icons
 const PLACEHOLDER_GRADIENTS = [
@@ -226,7 +226,7 @@ function Developer() {
             </button>
           </div>
         </div>
-        <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+        <AuthModal open={loginOpen} onClose={() => setLoginOpen(false)} />
       </div>
     );
   }

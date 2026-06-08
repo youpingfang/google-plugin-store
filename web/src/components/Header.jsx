@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Puzzle, Plus, LayoutDashboard, X, Menu, Shield, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
-import LoginModal from './LoginModal';
+import AuthModal from './AuthModal';
 import ThemeToggle from './ThemeToggle';
 
 const CATEGORIES = [
@@ -256,7 +256,7 @@ function Header({ activeCategory, onCategoryChange }) {
       )}
     </header>
 
-    <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+    <AuthModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }
