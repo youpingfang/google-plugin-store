@@ -158,14 +158,14 @@ function Header() {
                   )}
                 </button>
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-xl shadow-lg py-2 animate-fadeIn">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-xl shadow-lg py-2 animate-fadeIn">
                     <div className="px-4 py-2 border-b border-border">
                       <div className="text-sm font-semibold text-text-primary">{user.name || user.login}</div>
                       <div className="text-xs text-text-secondary">@{user.login}</div>
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-danger transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-surface hover:text-danger transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       登出
