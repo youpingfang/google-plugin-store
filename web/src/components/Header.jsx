@@ -117,38 +117,28 @@ function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {!isDeveloperPage && (
-              <>
+              isAdmin ? (
                 <Link
                   to="/developer"
-                  className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-text-secondary
-                           hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                           bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                           transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>开发者</span>
+                  <span className="hidden sm:inline">插件管理后台</span>
                 </Link>
-                {isAdmin ? (
-                  <Link
-                    to="/developer?action=add"
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                             bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
-                             transition-all hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">提交插件</span>
-                  </Link>
-                ) : (
-                  <button
-                    onClick={() => setLoginOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                             bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
-                             transition-all hover:-translate-y-0.5 active:translate-y-0"
-                    title="需要管理员登录"
-                  >
-                    <Shield className="w-4 h-4" />
-                    <span className="hidden sm:inline">提交插件</span>
-                  </button>
-                )}
-              </>
+              ) : (
+                <button
+                  onClick={() => setLoginOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                           bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                           transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  title="登录后进入插件管理后台"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span className="hidden sm:inline">插件管理后台</span>
+                </button>
+              )
             )}
 
             {/* User pill (when logged in) */}
@@ -203,24 +193,26 @@ function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background animate-fadeIn">
           <div className="px-4 py-3 space-y-2">
-            <Link
-              to="/developer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-secondary
-                       hover:text-primary hover:bg-surface rounded-lg transition-colors"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              开发者后台
-            </Link>
-            <Link
-              to="/developer?action=add"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-white
-                       bg-primary rounded-lg"
-            >
-              <Plus className="w-4 h-4" />
-              提交插件
-            </Link>
+            {isAdmin ? (
+              <Link
+                to="/developer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-white
+                         bg-primary rounded-lg"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                插件管理后台
+              </Link>
+            ) : (
+              <button
+                onClick={() => { setMobileMenuOpen(false); setLoginOpen(true); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-white
+                         bg-primary rounded-lg text-left"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                插件管理后台
+              </button>
+            )}
           </div>
         </div>
       )}
