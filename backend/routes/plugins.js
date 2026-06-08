@@ -8,25 +8,14 @@ import { getPackagesDir } from '../services/storage.js';
 
 const router = Router();
 
-// List plugins. Anonymous and 'user' callers only see plugins they
-// uploaded; 'admin' sees everything.
-router.get('/', optionalAuth, async (req, res) => {
+// List plugins. The catalog is public — anyone can browse every
+// plugin. Authentication is only required for mutations (POST/PUT/DELETE)
+// and the user-id-based filter is applied client-side by the developer
+// dashboard, not here.
+router.get('/', async (req, res) => {
   try {
     const { category, search, sort, page = 1, limit = 20 } = req.query;
     let plugins = await getPlugins();
-
-    // Role-based visibility: regular users only see their own uploads.
-    if (!req.user || req.user.role !== 'admin') {
-      const me = req.user?.email || null;
-      if (me) {
-        plugins = plugins.filter((p) => p.uploadedBy === me);
-      } else {
-        // Unauthenticated: empty list (browsing is gated).
-        // Admin can still hit the public catalog from outside if
-        // they want to — but here we keep it scoped to the caller.
-        plugins = [];
-      }
-    }
 
     // Filter by category
     if (category && category !== 'all') {
@@ -72,17 +61,11 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get single plugin
-router.get('/:id', optionalAuth, async (req, res) => {
+// Get single plugin. Public — anyone can view any plugin's detail page.
+router.get('/:id', async (req, res) => {
   try {
     const plugin = await getPluginById(req.params.id);
     if (!plugin) {
-      return res.status(404).json({ error: 'Plugin not found' });
-    }
-    // Visibility: admin sees everything, user only their own,
-    // anonymous only their own (i.e. nothing).
-    const me = req.user?.email || null;
-    if (req.user?.role !== 'admin' && plugin.uploadedBy !== me) {
       return res.status(404).json({ error: 'Plugin not found' });
     }
     res.json(plugin);
