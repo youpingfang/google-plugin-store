@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+web/dist/
+backend/data/packages/_temp/
+backend/data/packages/*/extension.zip.tmp
+
+# Per-plugin assets — icons are small and useful to track in repo, but the
+# full extension zip bundles can be 100s of MB. Keep the unzip result, ignore
+# the source zip.
+data/packages/*.zip
+# Generated extracted assets — also ignored (icons are tracked separately)
+
+# Runtime data — kept in repo for demo (plugin packages) but logs/temp ignored
+backend/data/packages/_temp/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  plugin-store:
+    build: .
+    ports:
+      - "3005:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
