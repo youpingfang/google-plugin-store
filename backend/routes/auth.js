@@ -1,44 +1,79 @@
-// Auth routes — login (PAT exchange), session check, logout.
+// Auth routes: setup-status, register, login (email+password), me, logout.
+// The legacy GitHub-PAT login is mounted at /api/auth/github for admin recovery.
 import { Router } from 'express';
-import { loginWithGitHubToken, requireAuth } from '../services/auth.js';
+import { registerUser, loginUser, hasAnyAdmin, requireAuth } from '../services/users.js';
+import { loginWithGitHubToken } from '../services/auth.js';
 
 const router = Router();
 
 /**
+ * GET /api/auth/setup-status
+ * Returns { needsSetup: true } when no admin account exists yet, so
+ * the frontend can show the "create first admin" form.
+ */
+router.get('/setup-status', async (req, res) => {
+  try {
+    const hasAdmin = await hasAnyAdmin();
+    res.json({ needsSetup: !hasAdmin });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/auth/register
+ * First call ever creates the admin; subsequent calls create 'user' accounts.
+ * body: { email, password, name? }
+ */
+router.post('/register', async (req, res) => {
+  try {
+    const result = await registerUser(req.body || {});
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
+});
+
+/**
  * POST /api/auth/login
- * body: { token: "<github_pat>" }
- * Returns: { token: "<jwt>", user: { login, name, avatar, id } }
+ * body: { email, password }
  */
 router.post('/login', async (req, res) => {
-  const { token } = req.body || {};
-  if (!token || typeof token !== 'string') {
-    return res.status(400).json({ error: 'Missing GitHub token in request body' });
-  }
   try {
-    const result = await loginWithGitHubToken(token.trim());
+    const result = await loginUser(req.body || {});
     res.json(result);
-  } catch (e) {
-    const code = e.statusCode || 401;
-    res.status(code).json({ error: e.message });
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
   }
 });
 
 /**
  * GET /api/auth/me
- * Returns the currently-authenticated user (decoded from JWT).
- * Useful for the frontend to check whether the saved token is still valid.
  */
 router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user });
 });
 
 /**
- * POST /api/auth/logout
- * Stateless logout — frontend just deletes the JWT from localStorage.
- * This endpoint exists so the UI can call something on logout.
+ * POST /api/auth/logout (stateless)
  */
 router.post('/logout', (req, res) => {
   res.json({ ok: true });
+});
+
+/**
+ * POST /api/auth/github  (admin recovery via GitHub PAT)
+ * body: { token: "<github_pat>" }
+ */
+router.post('/github', async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'Missing GitHub token' });
+    const result = await loginWithGitHubToken(token);
+    res.json(result);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
 });
 
 export default router;

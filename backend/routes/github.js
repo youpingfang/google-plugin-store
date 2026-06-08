@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { detectGitHubRepo, downloadGitHubRepo, extractManifestFromGitHubZip } from '../services/github.js';
 import { processGitHubPlugin } from '../services/converter.js';
 import { savePlugin } from '../services/storage.js';
-import { requireAdmin } from '../services/auth.js';
+import { requireAuth } from '../services/auth.js';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -26,8 +26,8 @@ router.post('/detect', async (req, res) => {
   }
 });
 
-// Import plugin from GitHub (admin only)
-router.post('/import', requireAdmin, async (req, res) => {
+// Import plugin from GitHub (authenticated). The current user becomes the uploader.
+router.post('/import', requireAuth, async (req, res) => {
   try {
     const { repoUrl, token, category, shortDescription } = req.body;
     
@@ -84,7 +84,9 @@ router.post('/import', requireAdmin, async (req, res) => {
         version: manifest.version || '1.0.0',
         date: new Date().toISOString().split('T')[0],
         note: 'Initial import from GitHub'
-      }]
+      }],
+      uploadedBy: req.user.email,
+      uploadedAt: new Date().toISOString(),
     };
     
     await savePlugin(plugin);

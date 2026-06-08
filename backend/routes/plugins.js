@@ -1,19 +1,33 @@
 import { Router } from 'express';
 import { getPlugins, getPluginById, savePlugin, deletePlugin, recordInstall } from '../services/storage.js';
 import { processPluginZip } from '../services/converter.js';
-import { requireAdmin } from '../services/auth.js';
+import { requireAdmin, requireAuth, canModifyPlugin, optionalAuth } from '../services/auth.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { getPackagesDir } from '../services/storage.js';
 
 const router = Router();
 
-// List all plugins
-router.get('/', async (req, res) => {
+// List plugins. Anonymous and 'user' callers only see plugins they
+// uploaded; 'admin' sees everything.
+router.get('/', optionalAuth, async (req, res) => {
   try {
     const { category, search, sort, page = 1, limit = 20 } = req.query;
     let plugins = await getPlugins();
-    
+
+    // Role-based visibility: regular users only see their own uploads.
+    if (!req.user || req.user.role !== 'admin') {
+      const me = req.user?.email || null;
+      if (me) {
+        plugins = plugins.filter((p) => p.uploadedBy === me);
+      } else {
+        // Unauthenticated: empty list (browsing is gated).
+        // Admin can still hit the public catalog from outside if
+        // they want to — but here we keep it scoped to the caller.
+        plugins = [];
+      }
+    }
+
     // Filter by category
     if (category && category !== 'all') {
       plugins = plugins.filter(p => p.category === category);
@@ -59,10 +73,16 @@ router.get('/', async (req, res) => {
 });
 
 // Get single plugin
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const plugin = await getPluginById(req.params.id);
     if (!plugin) {
+      return res.status(404).json({ error: 'Plugin not found' });
+    }
+    // Visibility: admin sees everything, user only their own,
+    // anonymous only their own (i.e. nothing).
+    const me = req.user?.email || null;
+    if (req.user?.role !== 'admin' && plugin.uploadedBy !== me) {
       return res.status(404).json({ error: 'Plugin not found' });
     }
     res.json(plugin);
@@ -72,8 +92,9 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create plugin (admin only)
-router.post('/', requireAdmin, async (req, res) => {
+// Create plugin (any authenticated user). The uploader is recorded so
+// later updates/deletes can be authorized.
+router.post('/', requireAuth, async (req, res) => {
   try {
     const { name, author, version, category, shortDescription, description, githubRepo } = req.body;
     
@@ -106,7 +127,9 @@ router.post('/', requireAdmin, async (req, res) => {
       githubRepo: githubRepo || '',
       tags: [],
       status: 'published',
-      versions: []
+      versions: [],
+      uploadedBy: req.user.email,
+      uploadedAt: new Date().toISOString(),
     };
     
     await savePlugin(plugin);
@@ -117,15 +140,19 @@ router.post('/', requireAdmin, async (req, res) => {
   }
 });
 
-// Update plugin (admin only)
-router.put('/:id', requireAdmin, async (req, res) => {
+// Update plugin (admin or uploader)
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const existing = await getPluginById(req.params.id);
     if (!existing) {
       return res.status(404).json({ error: 'Plugin not found' });
     }
-    
-    const updated = { ...existing, ...req.body, id: req.params.id };
+    if (!canModifyPlugin(req, existing)) {
+      return res.status(403).json({ error: 'You can only edit plugins you uploaded' });
+    }
+    // Don't let users change ownership via update
+    const { uploadedBy: _u, uploadedAt: _ua, ...body } = req.body || {};
+    const updated = { ...existing, ...body, id: req.params.id };
     await savePlugin(updated);
     res.json(updated);
   } catch (err) {
@@ -134,9 +161,16 @@ router.put('/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// Delete plugin (admin only)
-router.delete('/:id', requireAdmin, async (req, res) => {
+// Delete plugin (admin or uploader)
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
+    const existing = await getPluginById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Plugin not found' });
+    }
+    if (!canModifyPlugin(req, existing)) {
+      return res.status(403).json({ error: 'You can only delete plugins you uploaded' });
+    }
     const success = await deletePlugin(req.params.id);
     if (!success) {
       return res.status(404).json({ error: 'Plugin not found' });

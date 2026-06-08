@@ -1,6 +1,6 @@
 {
   "name": "plugin-store-backend",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Plugin Store Backend API",
   "main": "server.js",
   "type": "module",
@@ -11,6 +11,7 @@
   "dependencies": {
     "adm-zip": "^0.5.10",
     "archiver": "^6.0.1",
+    "bcryptjs": "^3.0.3",
     "cookie-session": "^2.1.1",
     "cors": "^2.8.5",
     "crx3": "^2.0.0",

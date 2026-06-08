@@ -11,6 +11,35 @@ and the root `VERSION` is bumped with each user-facing release.
   `GITHUB_CLIENT_SECRET` are set — current build uses GitHub PAT login
 - Per-user developer dashboard
 
+## [1.5.0] - 2026-06-08
+
+### Security & roles
+- **First signup becomes admin.** Subsequent accounts get the
+  'user' role. `setup-status` endpoint tells the frontend whether
+  the very first admin has been created yet.
+- **User visibility is scoped.** GET `/api/plugins` only returns
+  plugins the caller uploaded (or all of them for admin). GET
+  `/api/plugins/:id` returns 404 for plugins the caller can't see.
+- **Write endpoints are now `requireAuth`, not `requireAdmin`.**
+  Anyone signed in can upload / import. PUT and DELETE check
+  `canModifyPlugin` — admin: yes; user: only their own uploads.
+- **Plugin records gain `uploadedBy` (email) and `uploadedAt`**
+  so the visibility and modification rules have something to
+  compare against.
+- **Legacy GitHub-PAT path** retained at `/api/auth/github` for
+  admin recovery; still requires `ADMIN_GITHUB_USERS` env match.
+
+### Added
+- `backend/services/users.js` — bcrypt password hashing, JWT
+  signing, `registerUser`, `loginUser`, `hasAnyAdmin`,
+  `optionalAuth`, `requireAuth`, `requireAdmin`, `canModifyPlugin`
+- `backend/routes/auth.js` — `GET /setup-status`, `POST /register`,
+  `POST /login`, `GET /me`, `POST /logout`, `POST /github`
+- Storage: `data/users.json` is auto-created on first signup
+
+### Dependencies
+- backend: `bcryptjs`
+
 ## [1.4.0] - 2026-06-08
 
 ### Added

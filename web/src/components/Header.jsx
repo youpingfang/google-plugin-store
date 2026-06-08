@@ -74,6 +74,7 @@ function Header({ activeCategory, onCategoryChange }) {
   };
 
   return (
+    <>
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       {/* Top bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -256,6 +257,7 @@ function Header({ activeCategory, onCategoryChange }) {
     </header>
 
     <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+    </>
   );
 }
 
