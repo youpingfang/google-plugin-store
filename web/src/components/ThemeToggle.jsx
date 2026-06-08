@@ -1,4 +1,4 @@
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.jsx';
 
 function ThemeToggle() {

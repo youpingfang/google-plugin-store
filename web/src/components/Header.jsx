@@ -5,15 +5,8 @@ import { useAuth } from '../hooks/useAuth.jsx';
 import AuthModal from './AuthModal';
 import ThemeToggle from './ThemeToggle';
 
-const CATEGORIES = [
-  { id: 'all', name: '全部' },
-  { id: 'tools', name: '工具类' },
-  { id: 'entertainment', name: '娱乐类' },
-  { id: 'developer', name: '开发者工具' },
-  { id: 'theme', name: '主题' }
-];
 
-function Header({ activeCategory, onCategoryChange }) {
+function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -227,32 +220,6 @@ function Header({ activeCategory, onCategoryChange }) {
         </div>
       )}
 
-      {/* Category tabs */}
-      {!isDeveloperPage && (
-        <div className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <nav className="flex items-center gap-1 -mb-px overflow-x-auto scrollbar-hide">
-              {CATEGORIES.map((cat, i) => (
-                <button
-                  key={cat.id}
-                  onClick={() => onCategoryChange && onCategoryChange(cat.id)}
-                  className={`px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-all
-                           ${activeCategory === cat.id
-                             ? 'text-primary border-primary'
-                             : 'text-text-secondary border-transparent hover:text-text-primary hover:border-border'
-                           }`}
-                >
-                  <span className="relative">
-                    {cat.name}
-                    {activeCategory === cat.id && (
-                      <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-primary rounded-full" />
-                    )}
-                  </span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
       )}
     </header>
 
