@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { api } from '../api';
 import PluginCard from '../components/PluginCard';
+import InstallGuide from '../components/InstallGuide';
 
 // Gradients for placeholder icons (Chrome Web Store style)
 const PLACEHOLDER_GRADIENTS = [
@@ -185,12 +186,15 @@ function PluginDetail() {
               {/* Install Button */}
               <button
                 onClick={handleInstall}
-                className="mt-5 flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium 
+                className="mt-5 flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium
                          rounded-lg hover:bg-primary-hover transition-colors shadow-sm"
               >
                 <Download className="w-5 h-5" />
-                安装到 Chrome
+                下载并安装
               </button>
+              <p className="mt-2 text-xs text-text-secondary">
+                下载后请看页面下方的《下载后如何安装？》说明。
+              </p>
             </div>
           </div>
 
@@ -400,6 +404,9 @@ function PluginDetail() {
             </div>
           </div>
         </div>
+
+        {/* Install instructions */}
+        <InstallGuide />
 
         {/* Related plugins */}
         {relatedPlugins.length > 0 && (
