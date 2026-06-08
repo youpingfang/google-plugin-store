@@ -1,10 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import HeroBanner from '../components/HeroBanner';
+import CategoryCard from '../components/CategoryCard';
 import PluginCard from '../components/PluginCard';
 import { api } from '../api';
-import { Search, Sparkles, Clock, Trophy, Package, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, Clock, Trophy, Sparkles, Package, ArrowRight, Loader2 } from 'lucide-react';
 
-const CATEGORIES = ['all', 'tools', 'entertainment', 'developer', 'theme'];
+const CATEGORIES = [
+  { id: 'tools', name: '工具类' },
+  { id: 'entertainment', name: '娱乐类' },
+  { id: 'developer', name: '开发者工具' },
+  { id: 'theme', name: '主题' },
+  { id: 'productivity', name: '效率工具' },
+  { id: 'accessibility', name: '无障碍' },
+];
+
+const CATEGORY_GRADIENT = {
+  tools: 'from-blue-500 to-blue-600',
+  entertainment: 'from-pink-500 to-rose-500',
+  developer: 'from-violet-500 to-purple-600',
+  theme: 'from-emerald-500 to-teal-500',
+  productivity: 'from-amber-500 to-orange-500',
+  accessibility: 'from-cyan-500 to-sky-500',
+};
 
 function Home() {
   const [plugins, setPlugins] = useState([]);
@@ -32,11 +50,9 @@ function Home() {
       },
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
-
     Object.values(sectionRefs.current).forEach((ref) => {
       if (ref) observer.observe(ref);
     });
-
     return () => observer.disconnect();
   }, [plugins]);
 
@@ -48,7 +64,6 @@ function Home() {
       const params = {};
       if (category !== 'all') params.category = category;
       if (searchQuery) params.search = searchQuery;
-
       const data = await api.getPlugins(params);
       setPlugins(data.plugins || []);
     } catch (err) {
@@ -62,80 +77,128 @@ function Home() {
     sectionRefs.current[section] = el;
   };
 
-  // Split plugins into sections
-  const featured = plugins.slice(0, 5);
-  const recent = [...plugins].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 10);
-  const topRated = [...plugins].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10);
+  // Count per category (from full list, not search-filtered)
+  const [allPlugins, setAllPlugins] = useState([]);
+  useEffect(() => {
+    api.getPlugins().then((d) => setAllPlugins(d.plugins || [])).catch(() => {});
+  }, []);
+  const categoryCounts = CATEGORIES.reduce((acc, c) => {
+    acc[c.id] = allPlugins.filter((p) => p.category === c.id).length;
+    return acc;
+  }, {});
 
-  // Skeleton loader
+  // Sections
+  const featured = plugins.slice(0, 6);
+  const recent = [...plugins].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 6);
+  const topRated = [...plugins].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6);
+
   const SkeletonCard = ({ index }) => (
     <div
-      className="bg-white border border-border rounded-xl p-5 animate-fadeIn"
+      className="bg-surface border border-border rounded-2xl overflow-hidden animate-fadeIn"
       style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
     >
-      <div className="w-20 h-20 mx-auto mb-4 skeleton rounded-2xl" />
-      <div className="w-24 h-4 mx-auto mb-2 skeleton" />
-      <div className="w-16 h-3 mx-auto skeleton" />
-      <div className="flex justify-center gap-3 mt-3">
-        <div className="w-12 h-3 skeleton" />
-        <div className="w-12 h-3 skeleton" />
+      <div className="aspect-[16/10] skeleton" />
+      <div className="p-3.5 space-y-2">
+        <div className="w-3/4 h-4 skeleton" />
+        <div className="w-1/2 h-3 skeleton" />
+        <div className="w-2/3 h-3 skeleton" />
       </div>
     </div>
   );
 
+  const renderSection = ({ key, title, subtitle, icon: Icon, items, gradient, action }) => {
+    if (items.length === 0) return null;
+    return (
+      <section
+        ref={setSectionRef(key)}
+        data-section={key}
+        className={`transition-all duration-700 ${
+          loadedSections[key] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient}
+                          flex items-center justify-center shadow-md`}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-text-primary">{title}</h2>
+              {subtitle && <p className="text-sm text-text-secondary">{subtitle}</p>}
+            </div>
+          </div>
+          {action}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+          {items.map((plugin, i) => (
+            <PluginCard key={plugin.id} plugin={plugin} index={i} />
+          ))}
+        </div>
+      </section>
+    );
+  };
+
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8 space-y-10 md:space-y-12">
+        {/* Hero — only on the no-search home */}
+        {!searchQuery && <HeroBanner plugins={plugins} />}
+
+        {/* Category grid */}
+        {!searchQuery && (
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-text-primary">热门类别</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {CATEGORIES.map((c) => (
+                <CategoryCard
+                  key={c.id}
+                  id={c.id}
+                  name={c.name}
+                  count={categoryCounts[c.id] || 0}
+                  onClick={() => {
+                    setCategory(c.id);
+                    window.scrollTo({ top: 600, behavior: 'smooth' });
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Search results header */}
         {searchQuery && (
-          <div className="mb-8 animate-slideUp">
+          <div className="animate-slideUp">
             <div className="flex items-center gap-3 text-text-secondary mb-2">
               <Search className="w-5 h-5" />
               <span>搜索结果</span>
             </div>
-            <h1 className="text-2xl font-bold text-text-primary">
-              "{searchQuery}"
-            </h1>
+            <h1 className="text-2xl font-bold text-text-primary">"{searchQuery}"</h1>
             <p className="text-sm text-text-secondary mt-1">
               找到 {plugins.length} 个相关插件
             </p>
           </div>
         )}
 
-        {/* Loading state */}
+        {/* Loading / Error / Empty / Content */}
         {loading ? (
-          <div>
-            {/* Featured skeleton */}
-            <div className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <div className="w-20 h-6 skeleton rounded" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {[...Array(5)].map((_, i) => (
-                  <SkeletonCard key={i} index={i} />
-                ))}
-              </div>
-            </div>
-            {/* More sections skeleton */}
-            <div className="space-y-12">
-              {[...Array(2)].map((_, si) => (
-                <div key={si}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-primary" />
-                    <div className="w-24 h-6 skeleton rounded" />
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {[...Array(5)].map((_, i) => (
-                      <SkeletonCard key={i} index={i + si * 5} />
-                    ))}
-                  </div>
+          <div className="space-y-12">
+            {[...Array(3)].map((_, si) => (
+              <div key={si}>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-10 h-10 rounded-xl skeleton" />
+                  <div className="w-32 h-6 skeleton rounded" />
                 </div>
-              ))}
-            </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <SkeletonCard key={i} index={i + si * 6} />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
-          /* Error state */
           <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
             <div className="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center mb-4">
               <span className="text-3xl">😵</span>
@@ -152,7 +215,6 @@ function Home() {
             </button>
           </div>
         ) : plugins.length === 0 ? (
-          /* Empty state */
           <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
             <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-4">
               <Package className="w-10 h-10 text-text-secondary" />
@@ -175,118 +237,61 @@ function Home() {
             </a>
           </div>
         ) : (
-          /* Content */
           <>
             {!searchQuery && (
               <>
-                {/* Featured */}
-                {featured.length > 0 && (
-                  <section
-                    ref={setSectionRef('featured')}
-                    className={`mb-12 transition-all duration-700 ${loadedSections.featured ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    data-section="featured"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-text-primary">精选推荐</h2>
-                          <p className="text-sm text-text-secondary">编辑推荐，不容错过</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {featured.map((plugin, i) => (
-                        <div key={plugin.id} className="animate-fadeIn" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
-                          <PluginCard plugin={plugin} index={i} />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                {renderSection({
+                  key: 'featured',
+                  title: '你玩，您可能会喜欢',
+                  subtitle: '编辑精选推荐',
+                  icon: Sparkles,
+                  items: featured,
+                  gradient: 'from-amber-400 to-orange-500',
+                  action: (
+                    <a href="/developer?action=add" className="text-sm text-primary hover:text-primary-hover
+                                                          flex items-center gap-1 group">
+                      全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                  ),
+                })}
 
-                {/* Recent */}
-                {recent.length > 0 && (
-                  <section
-                    ref={setSectionRef('recent')}
-                    className={`mb-12 transition-all duration-700 ${loadedSections.recent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    data-section="recent"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                          <Clock className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-text-primary">近期更新</h2>
-                          <p className="text-sm text-text-secondary">保持最新，体验新功能</p>
-                        </div>
-                      </div>
-                      <a
-                        href="/?sort=updated"
-                        className="flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors group"
-                      >
-                        查看全部
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </a>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {recent.map((plugin, i) => (
-                        <div key={plugin.id} className="animate-fadeIn" style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'both' }}>
-                          <PluginCard plugin={plugin} index={i} />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                {renderSection({
+                  key: 'recent',
+                  title: '近期更新',
+                  subtitle: '保持最新，体验新功能',
+                  icon: Clock,
+                  items: recent,
+                  gradient: 'from-blue-500 to-cyan-500',
+                  action: (
+                    <a href="/?sort=updated" className="text-sm text-primary hover:text-primary-hover
+                                                    flex items-center gap-1 group">
+                      查看全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                  ),
+                })}
 
-                {/* Top Rated */}
-                {topRated.length > 0 && (
-                  <section
-                    ref={setSectionRef('top')}
-                    className={`mb-12 transition-all duration-700 ${loadedSections.top ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    data-section="top"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                          <Trophy className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-text-primary">评分最高</h2>
-                          <p className="text-sm text-text-secondary">用户好评如潮</p>
-                        </div>
-                      </div>
-                      <a
-                        href="/?sort=rating"
-                        className="flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors group"
-                      >
-                        查看全部
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </a>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {topRated.map((plugin, i) => (
-                        <div key={plugin.id} className="animate-fadeIn" style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'both' }}>
-                          <PluginCard plugin={plugin} index={i} />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                {renderSection({
+                  key: 'top',
+                  title: '评分最高',
+                  subtitle: '用户好评如潮',
+                  icon: Trophy,
+                  items: topRated,
+                  gradient: 'from-purple-500 to-pink-500',
+                  action: (
+                    <a href="/?sort=rating" className="text-sm text-primary hover:text-primary-hover
+                                                   flex items-center gap-1 group">
+                      查看全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                  ),
+                })}
               </>
             )}
 
-            {/* Search results */}
             {searchQuery && (
               <section>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                   {plugins.map((plugin, i) => (
-                    <div key={plugin.id} className="animate-fadeIn" style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}>
-                      <PluginCard plugin={plugin} index={i} />
-                    </div>
+                    <PluginCard key={plugin.id} plugin={plugin} index={i} />
                   ))}
                 </div>
               </section>
@@ -294,28 +299,6 @@ function Home() {
           </>
         )}
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-border mt-16 bg-surface/50">
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Package className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-text-primary">Plugin Store</span>
-            </div>
-            <p className="text-sm text-text-secondary">
-              开源浏览器插件商店 · 让插件发现更简单
-            </p>
-            <div className="flex items-center gap-6 text-sm text-text-secondary">
-              <a href="#" className="hover:text-primary transition-colors">关于</a>
-              <a href="#" className="hover:text-primary transition-colors">帮助</a>
-              <a href="#" className="hover:text-primary transition-colors">联系我们</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

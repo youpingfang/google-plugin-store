@@ -11,6 +11,29 @@ and the root `VERSION` is bumped with each user-facing release.
   `GITHUB_CLIENT_SECRET` are set — current build uses GitHub PAT login
 - Per-user developer dashboard
 
+## [1.4.0] - 2026-06-08
+
+### Added
+- **Home page redesign** modeled on the Chrome Web Store:
+  - **HeroBanner** with 5 rotating slides, floating plugin-icon row,
+    auto-advance + manual controls (prev/next/pause)
+  - **CategoryCard** grid — 6 large colored tiles (tools blue,
+    entertainment pink, developer violet, theme emerald,
+    productivity amber, accessibility cyan), each with a count badge
+  - **PluginCard** v2 — large 16:10 cover area, left-aligned title +
+    author, compact rating/install row, used in all 6-column grids
+  - All three content sections (Featured / Recent / Top Rated) now
+    use the new card and a 6-column grid
+- **Light / dark theme** end-to-end:
+  - All colors tokenized as CSS variables in `index.css`
+  - Tailwind config maps `primary` / `surface` / `text-*` etc. to vars
+  - `useTheme` hook with localStorage + OS preference fallback
+  - `ThemeToggle` pill in the header (sun/moon)
+
+### Changed
+- `bg-white` -> `bg-surface` across PluginDetail and Developer pages
+  so they follow the active theme
+
 ## [1.3.0] - 2026-06-08
 
 ### Security

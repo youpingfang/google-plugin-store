@@ -200,7 +200,7 @@ function Developer() {
     return (
       <div className="min-h-screen bg-surface">
         <div className="max-w-md mx-auto pt-24 px-4">
-          <div className="bg-white rounded-2xl border border-border p-8 text-center">
+          <div className="bg-surface rounded-2xl border border-border p-8 text-center">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Shield className="w-7 h-7 text-primary" />
             </div>
@@ -248,7 +248,7 @@ function Developer() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-border min-h-screen sticky top-0">
+        <aside className="w-64 bg-surface border-r border-border min-h-screen sticky top-0">
           <div className="p-6">
             <h1 className="text-lg font-bold text-text-primary">开发者后台</h1>
           </div>
@@ -281,22 +281,22 @@ function Developer() {
               
               {/* Stats */}
               <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="bg-white rounded-xl border border-border p-6">
+                <div className="bg-surface rounded-xl border border-border p-6">
                   <p className="text-text-secondary text-sm">总安装量</p>
                   <p className="text-3xl font-bold text-text-primary mt-1">{totalInstalls.toLocaleString()}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-border p-6">
+                <div className="bg-surface rounded-xl border border-border p-6">
                   <p className="text-text-secondary text-sm">插件数量</p>
                   <p className="text-3xl font-bold text-text-primary mt-1">{plugins.length}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-border p-6">
+                <div className="bg-surface rounded-xl border border-border p-6">
                   <p className="text-text-secondary text-sm">平均评分</p>
                   <p className="text-3xl font-bold text-text-primary mt-1">{avgRating} ⭐</p>
                 </div>
               </div>
 
               {/* Recent plugins */}
-              <div className="bg-white rounded-xl border border-border">
+              <div className="bg-surface rounded-xl border border-border">
                 <div className="px-6 py-4 border-b border-border">
                   <h3 className="font-semibold text-text-primary">我的插件</h3>
                 </div>
@@ -346,7 +346,7 @@ function Developer() {
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
               ) : (
-                <div className="bg-white rounded-xl border border-border">
+                <div className="bg-surface rounded-xl border border-border">
                   {plugins.map((plugin, i) => (
                     <div key={plugin.id} className={`px-6 py-4 flex items-center gap-4 ${i > 0 ? 'border-t border-border' : ''}`}>
                       <div className="w-14 h-14 shrink-0">
@@ -409,7 +409,7 @@ function Developer() {
             <div>
               <h2 className="text-2xl font-bold text-text-primary mb-6">添加插件</h2>
               
-              <div className="bg-white rounded-xl border border-border p-6 max-w-2xl">
+              <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl">
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Name */}
                   <div>
@@ -562,7 +562,7 @@ function Developer() {
             <div>
               <h2 className="text-2xl font-bold text-text-primary mb-6">从 GitHub 导入</h2>
               
-              <div className="bg-white rounded-xl border border-border p-6 max-w-2xl mb-6">
+              <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl mb-6">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
@@ -631,7 +631,7 @@ function Developer() {
 
               {/* Preview */}
               {githubPreview && (
-                <div className="bg-white rounded-xl border border-border p-6 max-w-2xl">
+                <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl">
                   <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-success" />
                     检测到插件

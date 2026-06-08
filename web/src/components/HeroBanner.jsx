@@ -1,0 +1,145 @@
+// HeroBanner — large top-of-page hero with gradient, headline, and a
+// floating row of plugin icons. Modeled on the Chrome Web Store hero.
+//
+// All colors come from CSS variables / utility classes so it follows
+// the active light/dark theme.
+
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Sparkles, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+
+const SLIDES = [
+  {
+    title: '每天都是世界地球日',
+    subtitle: '种树插件，环保购物等',
+    cta: '查看合集',
+    gradient: 'from-emerald-400 via-emerald-300 to-sky-200',
+  },
+  {
+    title: '为开发者打造的 AI 工具集',
+    subtitle: 'Transformer、Agent、Prompt 工程全覆盖',
+    cta: '立即查看',
+    gradient: 'from-violet-500 via-purple-400 to-pink-300',
+  },
+  {
+    title: '沉浸阅读，专注当下',
+    subtitle: '深度阅读插件，护眼暗色主题',
+    cta: '探索更多',
+    gradient: 'from-amber-400 via-orange-300 to-rose-300',
+  },
+  {
+    title: '效率工具，节省你的时间',
+    subtitle: 'Tab 管理、快速笔记、自动化脚本',
+    cta: '浏览全部',
+    gradient: 'from-blue-500 via-cyan-400 to-teal-300',
+  },
+  {
+    title: '让浏览器更懂你',
+    subtitle: '主题、字体、布局个性化',
+    cta: '开始定制',
+    gradient: 'from-rose-400 via-pink-300 to-fuchsia-300',
+  },
+];
+
+function HeroBanner({ plugins = [] }) {
+  const [slide, setSlide] = useState(0);
+  const [playing, setPlaying] = useState(true);
+
+  // Pick up to 6 plugins with icons for the floating icon row
+  const icons = plugins
+    .filter((p) => p.icon)
+    .slice(0, 6);
+
+  useEffect(() => {
+    if (!playing) return;
+    const t = setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 5000);
+    return () => clearInterval(t);
+  }, [playing]);
+
+  const current = SLIDES[slide];
+
+  return (
+    <section
+      className={`relative w-full h-72 md:h-80 rounded-3xl overflow-hidden
+                  bg-gradient-to-br ${current.gradient}
+                  transition-all duration-700 ease-out`}
+    >
+      {/* Decorative blurred orbs */}
+      <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-48 h-48
+                    rounded-full bg-white/30 blur-2xl pointer-events-none" />
+      <div className="absolute right-1/3 -bottom-12 w-40 h-40
+                    rounded-full bg-white/25 blur-2xl pointer-events-none" />
+
+      <div className="relative h-full flex flex-col items-center justify-center px-6 text-center">
+        <h1 className="text-3xl md:text-5xl font-bold text-text-primary drop-shadow-sm
+                     tracking-tight">
+          {current.title}
+        </h1>
+        <p className="mt-2 text-sm md:text-base text-text-primary/80 max-w-xl">
+          {current.subtitle}
+        </p>
+
+        {/* Floating plugin icons */}
+        {icons.length > 0 && (
+          <div className="mt-6 flex items-center justify-center gap-3 md:gap-4">
+            {icons.map((p) => (
+              <Link
+                key={p.id}
+                to={`/plugin/${p.id}`}
+                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
+                         ring-1 ring-black/5 overflow-hidden
+                         hover:-translate-y-1 transition-transform duration-200
+                         img-zoom"
+                title={p.name}
+              >
+                <img src={p.icon} alt={p.name} className="w-full h-full object-cover" />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <Link
+          to="/developer?action=add"
+          className="mt-6 inline-flex items-center gap-2 px-5 py-2 bg-white
+                   text-text-primary font-medium rounded-full
+                   shadow-lg hover:shadow-xl hover:-translate-y-0.5
+                   transition-all duration-200"
+        >
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          {current.cta}
+        </Link>
+      </div>
+
+      {/* Slide controls (bottom-right) */}
+      <div className="absolute bottom-4 right-4 flex items-center gap-1
+                    bg-black/30 backdrop-blur-sm rounded-full px-1 py-0.5">
+        <button
+          onClick={() => setSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length)}
+          className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
+          aria-label="上一张"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <span className="text-white text-xs font-medium tabular-nums px-1">
+          {slide + 1}/{SLIDES.length}
+        </span>
+        <button
+          onClick={() => setSlide((s) => (s + 1) % SLIDES.length)}
+          className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
+          aria-label="下一张"
+        >
+          <ChevronLeft className="w-4 h-4 rotate-180" />
+        </button>
+        <button
+          onClick={() => setPlaying((p) => !p)}
+          className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
+          aria-label={playing ? '暂停' : '播放'}
+        >
+          {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export default HeroBanner;

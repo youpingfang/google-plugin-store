@@ -368,7 +368,7 @@ function PluginDetail() {
                   {plugin.tags.map((tag, i) => (
                     <span
                       key={i}
-                      className="px-2.5 py-1 bg-white border border-border rounded-full text-xs text-text-secondary"
+                      className="px-2.5 py-1 bg-surface border border-border rounded-full text-xs text-text-secondary"
                     >
                       {tag}
                     </span>
@@ -384,7 +384,7 @@ function PluginDetail() {
                 href={plugin.authorUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 hover:bg-white p-2 -m-2 rounded-lg transition-colors"
+                className="flex items-center gap-3 hover:bg-surface p-2 -m-2 rounded-lg transition-colors"
               >
                 <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                   <span className="text-primary font-bold">{plugin.author.charAt(0).toUpperCase()}</span>
