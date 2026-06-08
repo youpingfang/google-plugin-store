@@ -2,23 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ============================================================
+   Theme tokens — all colors live in CSS variables so the whole
+   app can swap light / dark by changing data-theme on <html>.
+   ============================================================ */
+:root,
+:root[data-theme='light'] {
   --color-primary: #1a73e8;
   --color-primary-hover: #1557b0;
   --color-background: #ffffff;
   --color-surface: #f8f9fa;
+  --color-surface-2: #f1f3f4;
   --color-border: #dadce0;
   --color-text-primary: #202124;
   --color-text-secondary: #5f6368;
   --color-success: #34a853;
   --color-danger: #ea4335;
   --color-star: #fbbc04;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-overlay: rgba(255, 255, 255, 0.7);
+  --color-skeleton-from: #f0f0f0;
+  --color-skeleton-mid: #e0e0e0;
+}
+
+:root[data-theme='dark'] {
+  --color-primary: #8ab4f8;
+  --color-primary-hover: #aecbfa;
+  --color-background: #202124;
+  --color-surface: #292a2d;
+  --color-surface-2: #35363a;
+  --color-border: #3c4043;
+  --color-text-primary: #e8eaed;
+  --color-text-secondary: #9aa0a6;
+  --color-success: #81c995;
+  --color-danger: #f28b82;
+  --color-star: #fdd663;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --color-skeleton-from: #3c4043;
+  --color-skeleton-mid: #4a4d51;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  /* Smoother theme switch — prevents flash of unstyled colors */
+  color-scheme: light dark;
 }
 
 body {
@@ -28,6 +61,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Scrollbar */
@@ -101,7 +135,7 @@ body {
 
 /* ========== Skeleton Loading ========== */
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--color-skeleton-from) 25%, var(--color-skeleton-mid) 50%, var(--color-skeleton-from) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -113,7 +147,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 24px var(--color-shadow), 0 4px 8px var(--color-shadow);
   border-color: var(--color-primary);
 }
 .card-hover:hover .card-icon {
@@ -132,7 +166,7 @@ body {
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
+  box-shadow: 0 4px 12px var(--color-shadow);
 }
 .btn-primary:active {
   transform: translateY(0);
@@ -246,7 +280,7 @@ body {
 .rating-bar {
   height: 6px;
   border-radius: 3px;
-  background: #e8e8e8;
+  background: var(--color-surface-2);
   overflow: hidden;
 }
 .rating-bar-fill {
@@ -267,8 +301,8 @@ body {
   left: 50%;
   transform: translateX(-50%) scale(0.9);
   padding: 6px 12px;
-  background: #333;
-  color: white;
+  background: var(--color-text-primary);
+  color: var(--color-background);
   font-size: 12px;
   border-radius: 6px;
   white-space: nowrap;

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Puzzle, Plus, LayoutDashboard, X, Menu, Shield, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import LoginModal from './LoginModal';
+import ThemeToggle from './ThemeToggle';
 
 const CATEGORIES = [
   { id: 'all', name: '全部' },
@@ -73,7 +74,7 @@ function Header({ activeCategory, onCategoryChange }) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       {/* Top bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
@@ -185,6 +186,9 @@ function Header({ activeCategory, onCategoryChange }) {
               </div>
             )}
 
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -198,7 +202,7 @@ function Header({ activeCategory, onCategoryChange }) {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-white animate-fadeIn">
+        <div className="md:hidden border-t border-border bg-background animate-fadeIn">
           <div className="px-4 py-3 space-y-2">
             <Link
               to="/developer"

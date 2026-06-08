@@ -4,29 +4,34 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
+        // Map Tailwind color tokens to CSS variables so they automatically
+        // follow the active theme (light / dark).
         primary: {
-          DEFAULT: '#1a73e8',
-          hover: '#1557b0'
+          DEFAULT: 'var(--color-primary)',
+          hover: 'var(--color-primary-hover)',
         },
-        surface: '#f8f9fa',
-        border: '#dadce0',
-        'text-primary': '#202124',
-        'text-secondary': '#5f6368',
-        success: '#34a853',
-        danger: '#ea4335',
-        star: '#fbbc04'
+        surface: 'var(--color-surface)',
+        'surface-2': 'var(--color-surface-2)',
+        border: 'var(--color-border)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        success: 'var(--color-success)',
+        danger: 'var(--color-danger)',
+        star: 'var(--color-star)',
+        background: 'var(--color-background)',
       },
       fontFamily: {
         sans: ['Inter', 'Noto Sans SC', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace']
       },
       boxShadow: {
-        sm: '0 1px 2px rgba(0,0,0,0.1)',
-        md: '0 4px 12px rgba(0,0,0,0.12)',
-        lg: '0 8px 24px rgba(0,0,0,0.15)'
+        sm: '0 1px 2px var(--color-shadow)',
+        md: '0 4px 12px var(--color-shadow)',
+        lg: '0 8px 24px var(--color-shadow)',
       }
     },
   },
