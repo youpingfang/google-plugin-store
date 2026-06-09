@@ -9,7 +9,7 @@ function ThemeToggle() {
   const isDark = theme === 'dark';
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" data-component="theme-toggle">
       <button
         onClick={() => setTheme('light')}
         title="浅色主题"
