@@ -32,6 +32,7 @@ function PluginDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAllPermissions, setShowAllPermissions] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [relatedPlugins, setRelatedPlugins] = useState([]);
 
@@ -42,6 +43,7 @@ function PluginDetail() {
   const loadPlugin = async () => {
     try {
       setLoading(true);
+      setImgError(false);
       const data = await api.getPlugin(id);
       setPlugin(data);
       
@@ -137,12 +139,17 @@ function PluginDetail() {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Icon */}
             <div className="w-32 h-32 shrink-0">
-              {plugin.icon ? (
+              {plugin.icon && !imgError ? (
                 <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg ring-1 ring-black/10">
-                  <img src={plugin.icon} alt={plugin.name} className="w-full h-full object-cover" />
+                  <img
+                    src={plugin.icon}
+                    alt={plugin.name}
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ) : (
-                <div className={`w-full h-full rounded-2xl bg-gradient-to-br ${getGradient(plugin.name)} 
+                <div className={`w-full h-full rounded-2xl bg-gradient-to-br ${getGradient(plugin.name)}
                                flex items-center justify-center shadow-lg ring-1 ring-black/10`}>
                   <span className="text-white font-bold text-4xl drop-shadow-md">
                     {plugin.name.charAt(0).toUpperCase()}
