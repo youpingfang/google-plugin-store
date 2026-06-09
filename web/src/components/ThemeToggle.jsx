@@ -1,37 +1,38 @@
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme.jsx';
 
+// Simple two-button toggle. No wrapping pill — we render the two
+// buttons inline in the header so they sit flush with the rest of
+// the action row.
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const next = theme === 'dark' ? 'light' : 'dark';
-  const Icon = theme === 'dark' ? Sun : Moon;
-  const label = theme === 'dark' ? '切换到浅色' : '切换到深色';
+  const isDark = theme === 'dark';
 
   return (
-    <div className="flex items-center gap-0.5 p-0.5 rounded-full border border-border bg-surface">
+    <div className="flex items-center gap-1">
       <button
         onClick={() => setTheme('light')}
-        title="浅色"
-        aria-label="浅色主题"
-        className={`p-1.5 rounded-full transition-all ${
-          theme === 'light'
-            ? 'bg-background text-primary shadow-sm'
-            : 'text-text-secondary hover:text-text-primary'
+        title="浅色主题"
+        aria-label="切换到浅色"
+        className={`p-2 rounded-lg transition-colors ${
+          !isDark
+            ? 'bg-surface-2 text-text-primary'
+            : 'text-text-secondary hover:text-text-primary hover:bg-surface'
         }`}
       >
-        <Sun className="w-3.5 h-3.5" />
+        <Sun className="w-4 h-4" />
       </button>
       <button
         onClick={() => setTheme('dark')}
-        title="深色"
-        aria-label="深色主题"
-        className={`p-1.5 rounded-full transition-all ${
-          theme === 'dark'
-            ? 'bg-background text-primary shadow-sm'
-            : 'text-text-secondary hover:text-text-primary'
+        title="深色主题"
+        aria-label="切换到深色"
+        className={`p-2 rounded-lg transition-colors ${
+          isDark
+            ? 'bg-surface-2 text-text-primary'
+            : 'text-text-secondary hover:text-text-primary hover:bg-surface'
         }`}
       >
-        <Moon className="w-3.5 h-3.5" />
+        <Moon className="w-4 h-4" />
       </button>
     </div>
   );

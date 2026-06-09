@@ -11,12 +11,10 @@ function Header() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef(null);
-  const userMenuRef = useRef(null);
 
   // Handle keyboard shortcut (Cmd/Ctrl + K)
   useEffect(() => {
@@ -47,18 +45,6 @@ function Header() {
   };
 
   const isDeveloperPage = location.pathname === '/developer';
-
-  // Close user menu on outside click
-  useEffect(() => {
-    if (!userMenuOpen) return;
-    const onClick = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [userMenuOpen]);
 
   const handleLogout = () => {
     logout();
@@ -116,67 +102,55 @@ function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {!isDeveloperPage && (
-              isAdmin ? (
-                <Link
-                  to="/developer"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                           bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
-                           transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">插件管理后台</span>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => setLoginOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                           bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
-                           transition-all hover:-translate-y-0.5 active:translate-y-0"
-                  title="登录后进入插件管理后台"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">插件管理后台</span>
-                </button>
-              )
-            )}
-
-            {/* User pill (when logged in) */}
-            {user && (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setUserMenuOpen((v) => !v)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-surface transition-colors"
-                  title={user.login}
-                >
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.login} className="w-7 h-7 rounded-full ring-1 ring-border" />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold">
-                      {user.login?.[0]?.toUpperCase()}
-                    </div>
-                  )}
-                </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-xl shadow-lg py-2 animate-fadeIn">
-                    <div className="px-4 py-2 border-b border-border">
-                      <div className="text-sm font-semibold text-text-primary">{user.name || user.login}</div>
-                      <div className="text-xs text-text-secondary">@{user.login}</div>
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-surface hover:text-danger transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      登出
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Theme toggle */}
             <ThemeToggle />
+
+            {/* User pill + management link + logout, all inline (no dropdown) */}
+            {user ? (
+              <>
+                {!isDeveloperPage && (
+                  <Link
+                    to="/developer"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                             bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                             transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span className="hidden sm:inline">插件管理后台</span>
+                  </Link>
+                )}
+                <div
+                  className="flex items-center gap-2 px-2 py-1 rounded-full bg-surface border border-border"
+                  title={user.name || user.email}
+                >
+                  <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                    {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-xs font-medium text-text-primary hidden md:inline max-w-[8rem] truncate">
+                    {user.name || user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1 rounded-full text-text-secondary hover:text-danger hover:bg-surface-2 transition-colors"
+                    title="登出"
+                    aria-label="登出"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </>
+            ) : !isDeveloperPage && (
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+                         bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
+                         transition-all hover:-translate-y-0.5 active:translate-y-0"
+                title="登录后进入插件管理后台"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="hidden sm:inline">插件管理后台</span>
+              </button>
+            )}
 
             {/* Mobile menu button */}
             <button
