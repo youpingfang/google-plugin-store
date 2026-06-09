@@ -61,7 +61,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
       if (tab === 'register') {
         result = await api.register({ email: email.trim(), password, name: name.trim() });
       } else {
-        result = await api.login({ email: email.trim(), password });
+        result = await api.loginPassword({ email: email.trim(), password });
       }
       // Persist JWT and update auth context
       authStore.setToken(result.token);
