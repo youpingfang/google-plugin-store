@@ -83,17 +83,7 @@ function HeroBanner({ plugins = [] }) {
         {icons.length > 0 && (
           <div className="mt-6 flex items-center justify-center gap-3 md:gap-4">
             {icons.map((p) => (
-              <Link
-                key={p.id}
-                to={`/plugin/${p.id}`}
-                className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
-                         ring-1 ring-black/5 overflow-hidden
-                         hover:-translate-y-1 transition-transform duration-200
-                         img-zoom"
-                title={p.name}
-              >
-                <img src={p.icon} alt={p.name} className="w-full h-full object-cover" />
-              </Link>
+              <HeroIcon key={p.id} plugin={p} />
             ))}
           </div>
         )}
@@ -140,6 +130,53 @@ function HeroBanner({ plugins = [] }) {
       </div>
     </section>
   );
+}
+
+// Floating icon shown in the hero. Falls back to a colored tile
+// with the first letter when the icon URL fails to load.
+function HeroIcon({ plugin }) {
+  const [err, setErr] = useState(false);
+  const showImg = plugin.icon && !err;
+  return (
+    <Link
+      to={`/plugin/${plugin.id}`}
+      className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
+               ring-1 ring-black/5 overflow-hidden flex items-center justify-center
+               hover:-translate-y-1 transition-transform duration-200
+               img-zoom"
+      title={plugin.name}
+    >
+      {showImg ? (
+        <img
+          src={plugin.icon}
+          alt={plugin.name}
+          onError={() => setErr(true)}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span
+          className={`w-full h-full bg-gradient-to-br ${getHeroGradient(plugin.name)}
+                     flex items-center justify-center text-white font-bold text-lg drop-shadow-sm`}
+        >
+          {(plugin.name || '?').charAt(0).toUpperCase()}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+const HERO_GRADIENTS = [
+  'from-blue-500 to-blue-600',
+  'from-emerald-500 to-emerald-600',
+  'from-purple-500 to-purple-600',
+  'from-amber-500 to-amber-600',
+  'from-rose-500 to-rose-600',
+  'from-cyan-500 to-cyan-600',
+];
+
+function getHeroGradient(name) {
+  const i = (name || 'x').charCodeAt(0) % HERO_GRADIENTS.length;
+  return HERO_GRADIENTS[i];
 }
 
 export default HeroBanner;
