@@ -191,7 +191,6 @@ function Header() {
         </div>
       )}
 
-      )}
     </header>
 
     <AuthModal open={loginOpen} onClose={() => setLoginOpen(false)} />

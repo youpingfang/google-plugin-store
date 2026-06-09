@@ -1,6 +1,6 @@
 {
   "name": "plugin-store-backend",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "description": "Plugin Store Backend API",
   "main": "server.js",
   "type": "module",
