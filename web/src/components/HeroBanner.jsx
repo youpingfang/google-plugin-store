@@ -5,8 +5,7 @@
 // the active light/dark theme.
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Sparkles, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 
 const SLIDES = [
   {
@@ -70,33 +69,20 @@ function HeroBanner({ plugins = [] }) {
       <div className="absolute right-1/3 -bottom-12 w-40 h-40
                     rounded-full bg-white/25 blur-2xl pointer-events-none" />
 
-      <div className="relative h-full flex flex-col items-center justify-center px-6 text-center">
+      <div className="relative h-full flex flex-col items-center justify-center px-6 text-center gap-8">
         <h1 className="text-3xl md:text-5xl font-bold text-text-primary drop-shadow-sm
                      tracking-tight">
           {current.title}
         </h1>
-        <p className="mt-2 text-sm md:text-base text-text-primary/80 max-w-xl">
-          {current.subtitle}
-        </p>
 
-        {/* Floating plugin icons */}
+        {/* Floating plugin icons — the main attraction */}
         {icons.length > 0 && (
-          <div className="mt-6 flex items-center justify-center gap-3 md:gap-4">
+          <div className="flex items-center justify-center gap-3 md:gap-4">
             {icons.map((p) => (
               <HeroIcon key={p.id} plugin={p} />
             ))}
           </div>
         )}
-
-        <Link to="/developer?action=add"
-          className="mt-6 inline-flex items-center gap-2 px-5 py-2 bg-white
-                   text-text-primary font-medium rounded-full
-                   shadow-lg hover:shadow-xl hover:-translate-y-0.5
-                   transition-all duration-200"
-        >
-          <Sparkles strokeWidth={2.5} className="w-4 h-4 text-amber-500" />
-          {current.cta}
-        </Link>
       </div>
 
       {/* Slide controls (bottom-right) */}
@@ -137,12 +123,14 @@ function HeroIcon({ plugin }) {
   const [err, setErr] = useState(false);
   const showImg = plugin.icon && !err;
   return (
-    <Link to={`/plugin/${plugin.id}`}
+    <a
+      href={plugin.crxUrl}
+      download
       className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
                ring-1 ring-black/5 overflow-hidden flex items-center justify-center
                hover:-translate-y-1 transition-transform duration-200
                img-zoom"
-      title={plugin.name}
+      title={`下载 ${plugin.name}`}
     >
       {showImg ? (
         <img
@@ -159,7 +147,7 @@ function HeroIcon({ plugin }) {
           {(plugin.name || '?').charAt(0).toUpperCase()}
         </span>
       )}
-    </Link>
+    </a>
   );
 }
 
