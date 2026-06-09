@@ -74,7 +74,7 @@ function Header() {
           {/* Search */}
           <form onSubmit={handleSearch} className={`flex-1 max-w-xl transition-all duration-200 ${searchFocused ? 'scale-[1.02]' : ''}`}>
             <div className={`relative transition-all duration-200 ${searchFocused ? 'shadow-md' : 'shadow-sm'}`}>
-              <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${searchFocused ? 'text-primary' : 'text-text-secondary'}`} />
+              <Search strokeWidth={2.5} className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${searchFocused ? 'text-primary' : 'text-text-secondary'}`} />
               <input
                 ref={searchRef}
                 type="text"
@@ -109,13 +109,12 @@ function Header() {
             {user ? (
               <>
                 {!isDeveloperPage && (
-                  <Link
-                    to="/developer"
+                  <Link to="/developer"
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
                              bg-primary hover:bg-primary-hover rounded-xl shadow-md hover:shadow-lg
                              transition-all hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
+                    <LayoutDashboard strokeWidth={2.5} className="w-4 h-4" />
                     <span className="hidden sm:inline">插件管理后台</span>
                   </Link>
                 )}
@@ -135,7 +134,7 @@ function Header() {
                     title="登出"
                     aria-label="登出"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <LogOut strokeWidth={2.5} className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </>
@@ -147,7 +146,7 @@ function Header() {
                          transition-all hover:-translate-y-0.5 active:translate-y-0"
                 title="登录后进入插件管理后台"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard strokeWidth={2.5} className="w-4 h-4" />
                 <span className="hidden sm:inline">插件管理后台</span>
               </button>
             )}
@@ -157,7 +156,7 @@ function Header() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 hover:bg-surface rounded-lg transition-colors"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu strokeWidth={2.5} className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -168,13 +167,12 @@ function Header() {
         <div className="md:hidden border-t border-border bg-background animate-fadeIn">
           <div className="px-4 py-3 space-y-2">
             {isAdmin ? (
-              <Link
-                to="/developer"
+              <Link to="/developer"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-white
                          bg-primary rounded-lg"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard strokeWidth={2.5} className="w-4 h-4" />
                 插件管理后台
               </Link>
             ) : (
@@ -183,7 +181,7 @@ function Header() {
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-white
                          bg-primary rounded-lg text-left"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard strokeWidth={2.5} className="w-4 h-4" />
                 插件管理后台
               </button>
             )}

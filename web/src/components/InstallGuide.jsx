@@ -77,7 +77,7 @@ function InstallGuide() {
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-hover
                         flex items-center justify-center shadow-sm">
-            <FileQuestion className="w-4.5 h-4.5 text-white" />
+            <FileQuestion strokeWidth={2.5} className="w-4.5 h-4.5 text-white" />
           </div>
           <div className="text-left">
             <h2 className="text-base font-bold text-text-primary">下载后如何安装？</h2>
@@ -86,7 +86,7 @@ function InstallGuide() {
             </p>
           </div>
         </div>
-        {open ? <ChevronUp className="w-5 h-5 text-text-secondary" /> : <ChevronDown className="w-5 h-5 text-text-secondary" />}
+        {open ? <ChevronUp strokeWidth={2.5} className="w-5 h-5 text-text-secondary" /> : <ChevronDown strokeWidth={2.5} className="w-5 h-5 text-text-secondary" />}
       </button>
 
       {open && (
@@ -107,7 +107,7 @@ function InstallGuide() {
                               : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
                             }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon strokeWidth={2.5} className="w-4 h-4" />
                   {g.name}
                 </button>
               );
@@ -129,7 +129,7 @@ function InstallGuide() {
                       <div className="flex-1 pt-0.5 text-sm text-text-primary leading-relaxed">
                         {step.text}
                       </div>
-                      <StepIcon className="shrink-0 w-4 h-4 text-text-secondary mt-1" />
+                      <StepIcon strokeWidth={2.5} className="shrink-0 w-4 h-4 text-text-secondary mt-1" />
                     </li>
                   );
                 })}

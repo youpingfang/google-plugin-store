@@ -138,7 +138,7 @@ function PluginDetail() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft strokeWidth={2.5} className="w-4 h-4" />
             返回
           </button>
 
@@ -184,13 +184,13 @@ function PluginDetail() {
 
               {/* Stats */}
               <div className="flex items-center gap-6 mt-3">
-                <span className="flex items-center gap-1.5 text-sm">
-                  <Star className="w-4 h-4 text-star fill-star" />
+                <span className="flex items-center gap-2 text-base">
+                  <Star strokeWidth={2.5} className="w-4 h-4 text-star fill-star" />
                   <span className="font-medium">{plugin.rating?.toFixed(1) || '0.0'}</span>
                   <span className="text-text-secondary">({plugin.ratingCount || 0} 条评分)</span>
                 </span>
-                <span className="flex items-center gap-1.5 text-sm">
-                  <Users className="w-4 h-4 text-text-secondary" />
+                <span className="flex items-center gap-2 text-base">
+                  <Users strokeWidth={2.5} className="w-4 h-4 text-text-secondary" />
                   <span className="font-medium">{plugin.installCount || 0}</span>
                   <span className="text-text-secondary">用户</span>
                 </span>
@@ -202,10 +202,10 @@ function PluginDetail() {
                 className="mt-5 flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium
                          rounded-lg hover:bg-primary-hover transition-colors shadow-sm"
               >
-                <Download className="w-5 h-5" />
+                <Download strokeWidth={2.5} className="w-5 h-5" />
                 下载并安装
               </button>
-              <p className="mt-2 text-xs text-text-secondary">
+              <p className="mt-2 text-sm text-text-secondary">
                 下载后请看页面下方的《下载后如何安装？》说明。
               </p>
             </div>
@@ -244,7 +244,7 @@ function PluginDetail() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-sm text-text-secondary hover:text-primary"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink strokeWidth={2.5} className="w-4 h-4" />
                   GitHub
                 </a>
               </div>
@@ -282,7 +282,7 @@ function PluginDetail() {
                 <h2 className="text-lg font-semibold text-text-primary mb-4">权限说明</h2>
                 <div className="bg-surface rounded-lg border border-border p-4">
                   <div className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <Shield strokeWidth={2.5} className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <div className="text-sm text-text-secondary">
                       <p>此插件请求以下权限：</p>
                       <ul className="mt-2 space-y-1.5">
@@ -300,12 +300,12 @@ function PluginDetail() {
                         >
                           {showAllPermissions ? (
                             <>
-                              <ChevronUp className="w-4 h-4" />
+                              <ChevronUp strokeWidth={2.5} className="w-4 h-4" />
                               收起
                             </>
                           ) : (
                             <>
-                              <ChevronDown className="w-4 h-4" />
+                              <ChevronDown strokeWidth={2.5} className="w-4 h-4" />
                               显示全部权限
                             </>
                           )}
@@ -384,7 +384,7 @@ function PluginDetail() {
                   <span className="text-text-secondary">评分</span>
                   <span className="text-text-primary flex items-center gap-1">
                     {plugin.rating?.toFixed(1) || '0.0'}
-                    <Star className="w-3.5 h-3.5 text-star fill-star" />
+                    <Star strokeWidth={2.5} className="w-3.5 h-3.5 text-star fill-star" />
                   </span>
                 </div>
                 {plugin.githubRepo && (
@@ -397,7 +397,7 @@ function PluginDetail() {
                       className="text-primary hover:underline flex items-center gap-1"
                     >
                       GitHub
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink strokeWidth={2.5} className="w-3 h-3" />
                     </a>
                   </div>
                 )}
@@ -405,7 +405,7 @@ function PluginDetail() {
                   <>
                     <div className="pt-3 mt-3 border-t border-border" />
                     <div className="flex items-center gap-2 text-text-secondary">
-                      <Tag className="w-4 h-4" />
+                      <Tag strokeWidth={2.5} className="w-4 h-4" />
                       <span className="text-xs">标签</span>
                     </div>
                     <div className="flex flex-wrap gap-2">

@@ -192,7 +192,7 @@ function Developer() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <Loader2 strokeWidth={2.5} className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -202,7 +202,7 @@ function Developer() {
         <div className="max-w-md mx-auto pt-24 px-4">
           <div className="bg-surface rounded-2xl border border-border p-8 text-center">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-7 h-7 text-primary" />
+              <Shield strokeWidth={2.5} className="w-7 h-7 text-primary" />
             </div>
             <h2 className="text-xl font-bold text-text-primary mb-2">需要管理员登录</h2>
             <p className="text-sm text-text-secondary mb-6">
@@ -214,7 +214,7 @@ function Developer() {
                        bg-primary text-white font-medium rounded-lg
                        hover:bg-primary-hover transition-colors"
             >
-              <Shield className="w-4 h-4" />
+              <Shield strokeWidth={2.5} className="w-4 h-4" />
               登录
             </button>
             <button
@@ -238,9 +238,9 @@ function Developer() {
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slideUp
           ${notification.type === 'error' ? 'bg-danger text-white' : 'bg-success text-white'}`}>
           {notification.type === 'error' ? (
-            <AlertCircle className="w-5 h-5" />
+            <AlertCircle strokeWidth={2.5} className="w-5 h-5" />
           ) : (
-            <CheckCircle className="w-5 h-5" />
+            <CheckCircle strokeWidth={2.5} className="w-5 h-5" />
           )}
           {notification.message}
         </div>
@@ -265,7 +265,7 @@ function Developer() {
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors
                   ${activeTab === id ? 'bg-primary/10 text-primary font-medium' : 'text-text-secondary hover:bg-surface'}`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon strokeWidth={2.5} className="w-5 h-5" />
                 {label}
               </button>
             ))}
@@ -318,8 +318,7 @@ function Developer() {
                         <p className="font-medium text-text-primary">{plugin.name}</p>
                         <p className="text-sm text-text-secondary">v{plugin.version} · {plugin.installCount || 0} 安装</p>
                       </div>
-                      <Link
-                        to={`/plugin/${plugin.id}`}
+                      <Link to={`/plugin/${plugin.id}`}
                         className="text-primary hover:underline text-sm"
                       >
                         查看
@@ -343,7 +342,7 @@ function Developer() {
               
               {loading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <Loader2 strokeWidth={2.5} className="w-8 h-8 text-primary animate-spin" />
                 </div>
               ) : (
                 <div className="bg-surface rounded-xl border border-border">
@@ -372,24 +371,23 @@ function Developer() {
                             rel="noopener noreferrer"
                             className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
                           >
-                            <Github className="w-3 h-3" />
+                            <Github strokeWidth={2.5} className="w-3 h-3" />
                             {plugin.githubRepo.replace('https://github.com/', '')}
-                            <ExternalLink className="w-3 h-3" />
+                            <ExternalLink strokeWidth={2.5} className="w-3 h-3" />
                           </a>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link
-                          to={`/plugin/${plugin.id}`}
+                        <Link to={`/plugin/${plugin.id}`}
                           className="p-2 text-text-secondary hover:text-primary hover:bg-surface rounded-lg transition-colors"
                         >
-                          <ExternalLink className="w-5 h-5" />
+                          <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
                         </Link>
                         <button
                           onClick={() => handleDelete(plugin)}
                           className="p-2 text-text-secondary hover:text-danger hover:bg-surface rounded-lg transition-colors"
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 strokeWidth={2.5} className="w-5 h-5" />
                         </button>
                       </div>
                     </div>
@@ -509,12 +507,12 @@ function Developer() {
                       <label htmlFor="zip-upload" className="cursor-pointer">
                         {formData.zipFile ? (
                           <div className="flex items-center justify-center gap-2 text-success">
-                            <CheckCircle className="w-5 h-5" />
+                            <CheckCircle strokeWidth={2.5} className="w-5 h-5" />
                             <span>{formData.zipFile.name}</span>
                           </div>
                         ) : (
                           <>
-                            <Upload className="w-8 h-8 text-text-secondary mx-auto mb-2" />
+                            <Upload strokeWidth={2.5} className="w-8 h-8 text-text-secondary mx-auto mb-2" />
                             <p className="text-text-secondary">
                               点击选择或拖拽 ZIP 文件到此处
                             </p>
@@ -538,12 +536,12 @@ function Developer() {
                     >
                       {uploading ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
                           {uploadProgress || '处理中...'}
                         </>
                       ) : (
                         <>
-                          <Upload className="w-5 h-5" />
+                          <Upload strokeWidth={2.5} className="w-5 h-5" />
                           上传并发布
                         </>
                       )}
@@ -616,12 +614,12 @@ function Developer() {
                   >
                     {detecting ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
                         检测中...
                       </>
                     ) : (
                       <>
-                        <Search className="w-5 h-5" />
+                        <Search strokeWidth={2.5} className="w-5 h-5" />
                         检测插件信息
                       </>
                     )}
@@ -633,7 +631,7 @@ function Developer() {
               {githubPreview && (
                 <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl">
                   <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-success" />
+                    <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
                     检测到插件
                   </h3>
                   <div className="space-y-3 text-sm">
@@ -662,12 +660,12 @@ function Developer() {
                   >
                     {importing ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
                         导入中...
                       </>
                     ) : (
                       <>
-                        <Github className="w-5 h-5" />
+                        <Github strokeWidth={2.5} className="w-5 h-5" />
                         确认导入
                       </>
                     )}

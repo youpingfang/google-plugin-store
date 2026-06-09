@@ -58,7 +58,7 @@ function CategoryCard({ id, name, count, theme, href, onClick }) {
             </div>
           )}
         </div>
-        <ArrowUpRight className="w-4 h-4 text-white/80 group-hover:translate-x-0.5
+        <ArrowUpRight strokeWidth={2.5} className="w-4 h-4 text-white/80 group-hover:translate-x-0.5
                                  group-hover:-translate-y-0.5 transition-transform" />
       </div>
     </div>

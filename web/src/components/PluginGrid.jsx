@@ -10,12 +10,11 @@ function PluginGrid({ title, plugins, viewAllUrl, showViewAll = true }) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
         {showViewAll && viewAllUrl && (
-          <Link
-            to={viewAllUrl}
+          <Link to={viewAllUrl}
             className="flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
           >
             查看更多
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight strokeWidth={2.5} className="w-4 h-4" />
           </Link>
         )}
       </div>

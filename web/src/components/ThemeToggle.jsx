@@ -20,7 +20,7 @@ function ThemeToggle() {
             : 'text-text-secondary hover:text-text-primary hover:bg-surface'
         }`}
       >
-        <Sun className="w-4 h-4" />
+        <Sun strokeWidth={2.5} className="w-4 h-4" />
       </button>
       <button
         onClick={() => setTheme('dark')}
@@ -32,7 +32,7 @@ function ThemeToggle() {
             : 'text-text-secondary hover:text-text-primary hover:bg-surface'
         }`}
       >
-        <Moon className="w-4 h-4" />
+        <Moon strokeWidth={2.5} className="w-4 h-4" />
       </button>
     </div>
   );

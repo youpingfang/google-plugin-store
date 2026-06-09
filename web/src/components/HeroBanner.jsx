@@ -88,14 +88,13 @@ function HeroBanner({ plugins = [] }) {
           </div>
         )}
 
-        <Link
-          to="/developer?action=add"
+        <Link to="/developer?action=add"
           className="mt-6 inline-flex items-center gap-2 px-5 py-2 bg-white
                    text-text-primary font-medium rounded-full
                    shadow-lg hover:shadow-xl hover:-translate-y-0.5
                    transition-all duration-200"
         >
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles strokeWidth={2.5} className="w-4 h-4 text-amber-500" />
           {current.cta}
         </Link>
       </div>
@@ -108,7 +107,7 @@ function HeroBanner({ plugins = [] }) {
           className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
           aria-label="上一张"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft strokeWidth={2.5} className="w-4 h-4" />
         </button>
         <span className="text-white text-xs font-medium tabular-nums px-1">
           {slide + 1}/{SLIDES.length}
@@ -118,14 +117,14 @@ function HeroBanner({ plugins = [] }) {
           className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
           aria-label="下一张"
         >
-          <ChevronLeft className="w-4 h-4 rotate-180" />
+          <ChevronLeft strokeWidth={2.5} className="w-4 h-4 rotate-180" />
         </button>
         <button
           onClick={() => setPlaying((p) => !p)}
           className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
           aria-label={playing ? '暂停' : '播放'}
         >
-          {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          {playing ? <Pause strokeWidth={2.5} className="w-3.5 h-3.5" /> : <Play strokeWidth={2.5} className="w-3.5 h-3.5" />}
         </button>
       </div>
     </section>
@@ -138,8 +137,7 @@ function HeroIcon({ plugin }) {
   const [err, setErr] = useState(false);
   const showImg = plugin.icon && !err;
   return (
-    <Link
-      to={`/plugin/${plugin.id}`}
+    <Link to={`/plugin/${plugin.id}`}
       className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
                ring-1 ring-black/5 overflow-hidden flex items-center justify-center
                hover:-translate-y-1 transition-transform duration-200

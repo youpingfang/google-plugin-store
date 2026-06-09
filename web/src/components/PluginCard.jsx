@@ -22,8 +22,7 @@ function PluginCard({ plugin, index = 0, layout = 'grid' }) {
   // "row" layout: horizontal compact tile for narrow rows
   if (layout === 'row') {
     return (
-      <Link
-        to={`/plugin/${id}`}
+      <Link to={`/plugin/${id}`}
         className="group flex items-center gap-3 p-3 bg-surface border border-border
                  rounded-2xl hover:border-primary/50 hover:shadow-md
                  transition-all duration-200 animate-fadeIn"
@@ -52,11 +51,11 @@ function PluginCard({ plugin, index = 0, layout = 'grid' }) {
           </p>
           <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
             <span className="flex items-center gap-1">
-              <Star className="w-3 h-3 text-star fill-star" />
+              <Star strokeWidth={2.5} className="w-3 h-3 text-star fill-star" />
               <span className="font-medium text-text-primary">{rating.toFixed(1)}</span>
             </span>
             <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" />
+              <Users strokeWidth={2.5} className="w-3 h-3" />
               {formatCount(installCount)}
             </span>
           </div>
@@ -67,8 +66,7 @@ function PluginCard({ plugin, index = 0, layout = 'grid' }) {
 
   // Default: grid (big card) — Chrome Store style
   return (
-    <Link
-      to={`/plugin/${id}`}
+    <Link to={`/plugin/${id}`}
       className="group block bg-surface border border-border rounded-2xl
                overflow-hidden hover:border-primary/40 hover:shadow-xl
                hover:-translate-y-1 transition-all duration-300
@@ -113,12 +111,12 @@ function PluginCard({ plugin, index = 0, layout = 'grid' }) {
         )}
         <div className="flex items-center gap-3 mt-2.5 text-xs">
           <span className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-star fill-star" />
+            <Star strokeWidth={2.5} className="w-3.5 h-3.5 text-star fill-star" />
             <span className="font-medium text-text-primary">{rating.toFixed(1)}</span>
           </span>
           <span className="w-1 h-1 rounded-full bg-text-secondary/40" />
           <span className="flex items-center gap-1 text-text-secondary">
-            <Users className="w-3.5 h-3.5" />
+            <Users strokeWidth={2.5} className="w-3.5 h-3.5" />
             {formatCount(installCount)}
           </span>
         </div>

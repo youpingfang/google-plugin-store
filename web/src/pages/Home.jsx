@@ -125,7 +125,7 @@ function Home() {
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient}
                           flex items-center justify-center shadow-md`}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon strokeWidth={2.5} className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-text-primary">{title}</h2>
@@ -157,8 +157,7 @@ function Home() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
               {CATEGORIES.map((c) => (
-                <CategoryCard
-                  key={c.id}
+                <CategoryCard key={c.id}
                   id={c.id}
                   name={c.name}
                   count={categoryCounts[c.id] || 0}
@@ -173,7 +172,7 @@ function Home() {
         {searchQuery && (
           <div className="animate-slideUp">
             <div className="flex items-center gap-3 text-text-secondary mb-2">
-              <Search className="w-5 h-5" />
+              <Search strokeWidth={2.5} className="w-5 h-5" />
               <span>搜索结果</span>
             </div>
             <h1 className="text-2xl font-bold text-text-primary">"{searchQuery}"</h1>
@@ -194,7 +193,7 @@ function Home() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                   {[...Array(6)].map((_, i) => (
-                    <SkeletonCard key={i} index={i + si * 6} />
+                    <SkeletonCard strokeWidth={2.5} key={i} index={i + si * 6} />
                   ))}
                 </div>
               </div>
@@ -212,14 +211,14 @@ function Home() {
               className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-xl
                        hover:bg-primary-hover transition-all hover:-translate-y-0.5"
             >
-              <Loader2 className="w-4 h-4" />
+              <Loader2 strokeWidth={2.5} className="w-4 h-4" />
               重试
             </button>
           </div>
         ) : plugins.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
             <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-4">
-              <Package className="w-10 h-10 text-text-secondary" />
+              <Package strokeWidth={2.5} className="w-10 h-10 text-text-secondary" />
             </div>
             <h2 className="text-xl font-semibold text-text-primary mb-2">
               {searchQuery ? '没有找到相关插件' : '暂无插件'}
@@ -235,7 +234,7 @@ function Home() {
                        hover:bg-primary-hover transition-all hover:-translate-y-0.5"
             >
               {searchQuery ? '查看全部插件' : '提交插件'}
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight strokeWidth={2.5} className="w-4 h-4" />
             </a>
           </div>
         ) : (
@@ -252,7 +251,7 @@ function Home() {
                   action: (
                     <a href="/developer?action=add" className="text-sm text-primary hover:text-primary-hover
                                                           flex items-center gap-1 group">
-                      全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
                 })}
@@ -267,7 +266,7 @@ function Home() {
                   action: (
                     <a href="/?sort=updated" className="text-sm text-primary hover:text-primary-hover
                                                     flex items-center gap-1 group">
-                      查看全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      查看全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
                 })}
@@ -282,7 +281,7 @@ function Home() {
                   action: (
                     <a href="/?sort=rating" className="text-sm text-primary hover:text-primary-hover
                                                    flex items-center gap-1 group">
-                      查看全部 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      查看全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
                 })}

@@ -101,7 +101,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
         {/* Header */}
         <div className="flex items-center gap-3 mb-1">
           <div className="w-11 h-11 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center shadow-md">
-            {setupMode ? <Sparkles className="w-5 h-5 text-white" /> : <Shield className="w-5 h-5 text-white" />}
+            {setupMode ? <Sparkles strokeWidth={2.5} className="w-5 h-5 text-white" /> : <Shield strokeWidth={2.5} className="w-5 h-5 text-white" />}
           </div>
           <div>
             <h2 className="text-lg font-bold text-text-primary">
@@ -131,7 +131,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
                               : 'text-text-secondary hover:text-text-primary'
                             }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon strokeWidth={2.5} className="w-4 h-4" />
                   {t.label}
                 </button>
               );
@@ -142,7 +142,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
             <label className="flex items-center gap-1.5 text-sm font-medium text-text-primary mb-1.5">
-              <Mail className="w-4 h-4" />
+              <Mail strokeWidth={2.5} className="w-4 h-4" />
               <span>邮箱</span>
             </label>
             <input
@@ -162,7 +162,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
           {tab === 'register' && (
             <div>
               <label className="flex items-center gap-1.5 text-sm font-medium text-text-primary mb-1.5">
-                <User className="w-4 h-4" />
+                <User strokeWidth={2.5} className="w-4 h-4" />
                 <span>昵称 <span className="text-xs text-text-secondary font-normal">（可选）</span></span>
               </label>
               <input
@@ -180,7 +180,7 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
 
           <div>
             <label className="flex items-center gap-1.5 text-sm font-medium text-text-primary mb-1.5">
-              <KeyRound className="w-4 h-4" />
+              <KeyRound strokeWidth={2.5} className="w-4 h-4" />
               <span>密码</span>
               {tab === 'register' && (
                 <span className="text-xs text-text-secondary font-normal">（至少 6 位）</span>
@@ -205,14 +205,14 @@ function AuthModal({ open, onClose, initialTab = 'login', reason }) {
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-text-secondary hover:text-text-primary rounded transition-colors"
                 aria-label={showPw ? '隐藏密码' : '显示密码'}
               >
-                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPw ? <EyeOff strokeWidth={2.5} className="w-4 h-4" /> : <Eye strokeWidth={2.5} className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           {error && (
             <div className="flex items-start gap-2 p-3 bg-danger/10 border border-danger/30 rounded-lg text-sm text-danger">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <AlertCircle strokeWidth={2.5} className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
