@@ -142,9 +142,9 @@ function PluginDetail() {
             返回
           </button>
 
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
             {/* Icon */}
-            <div className="w-32 h-32 shrink-0">
+            <div className="w-40 h-40 md:w-48 md:h-48 shrink-0">
               {plugin.icon && !imgError ? (
                 <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg ring-1 ring-black/10">
                   <img
@@ -217,6 +217,37 @@ function PluginDetail() {
               <p className="text-text-primary leading-relaxed">
                 {plugin.shortDescription || plugin.description}
               </p>
+            </div>
+          )}
+
+          {/* Developer info moved to main column top */}
+          {plugin.author && (
+            <div className="mt-6 bg-surface rounded-2xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <span className="text-primary font-bold">{plugin.author.charAt(0).toUpperCase()}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-secondary">开发者</p>
+                  <a
+                    href={plugin.authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-text-primary hover:text-primary truncate block"
+                  >
+                    {plugin.author}
+                  </a>
+                </div>
+                <a
+                  href={plugin.authorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-text-secondary hover:text-primary"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  GitHub
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -392,27 +423,7 @@ function PluginDetail() {
               </div>
             </div>
 
-            {/* Developer info */}
-            <div className="bg-surface rounded-lg border border-border p-4">
-              <h3 className="font-semibold text-text-primary mb-3">开发者</h3>
-              <a
-                href={plugin.authorUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 hover:bg-surface p-2 -m-2 rounded-lg transition-colors"
-              >
-                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
-                  <span className="text-primary font-bold">{plugin.author.charAt(0).toUpperCase()}</span>
-                </div>
-                <div>
-                  <p className="font-medium text-text-primary">{plugin.author}</p>
-                  <p className="text-xs text-text-secondary flex items-center gap-1">
-                    查看 GitHub
-                    <ExternalLink className="w-3 h-3" />
-                  </p>
-                </div>
-              </a>
-            </div>
+            {/* Developer info moved to main column top */}
           </div>
         </div>
 
