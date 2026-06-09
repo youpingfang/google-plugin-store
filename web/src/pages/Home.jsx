@@ -77,6 +77,11 @@ function Home() {
     sectionRefs.current[section] = el;
   };
 
+  const handleCategoryClick = (catId) => {
+    setCategory(catId);
+    window.scrollTo({ top: 600, behavior: 'smooth' });
+  };
+
   // Count per category (from full list, not search-filtered)
   const [allPlugins, setAllPlugins] = useState([]);
   useEffect(() => {
@@ -157,10 +162,7 @@ function Home() {
                   id={c.id}
                   name={c.name}
                   count={categoryCounts[c.id] || 0}
-                  onClick={() => {
-                    setCategory(c.id);
-                    window.scrollTo({ top: 600, behavior: 'smooth' });
-                  }}
+                  onClick={handleCategoryClick.bind(null, c.id)}
                 />
               ))}
             </div>
