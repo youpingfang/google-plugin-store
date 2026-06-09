@@ -92,6 +92,12 @@ function PluginDetail() {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  const formatCount = (count) => {
+    if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
+    if (count >= 1000) return (count / 1000).toFixed(1) + 'k';
+    return count.toString();
+  };
+
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -238,43 +244,7 @@ function PluginDetail() {
               </section>
             )}
 
-            {/* Details */}
-            <section>
-              <h2 className="text-lg font-semibold text-text-primary mb-4">详细信息</h2>
-              <div className="bg-surface rounded-lg border border-border p-4 space-y-3 text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-text-secondary w-20">版本</span>
-                  <span className="text-text-primary font-medium">{plugin.version}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-text-secondary w-20">大小</span>
-                  <span className="text-text-primary">{formatSize(plugin.size)}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-text-secondary w-20">更新</span>
-                  <span className="text-text-primary">{formatDate(plugin.updatedAt)}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-text-secondary w-20">语言</span>
-                  <span className="text-text-primary">{(plugin.languages || ['en']).join('、')}</span>
-                </div>
-                {plugin.githubRepo && (
-                  <div className="flex items-center gap-4">
-                    <span className="text-text-secondary w-20">来源</span>
-                    <a 
-                      href={plugin.githubRepo} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1"
-                    >
-                      GitHub
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                )}
-              </div>
-            </section>
-
+            {/* Details moved to sidebar — see below */}
             {/* Permissions */}
             {(permissions.length > 0 || hostPermissions.length > 0) && (
               <section>
@@ -349,44 +319,78 @@ function PluginDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick stats */}
-            <div className="bg-surface rounded-lg border border-border p-4">
-              <h3 className="font-semibold text-text-primary mb-3">插件信息</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
+            {/* Combined info card: details + category + stats + tags */}
+            <div className="bg-surface rounded-lg border border-border p-5">
+              <h3 className="font-semibold text-text-primary mb-4">详细信息</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-secondary">版本</span>
+                  <span className="text-text-primary font-medium">{plugin.version}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-secondary">大小</span>
+                  <span className="text-text-primary">{formatSize(plugin.size)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-secondary">更新</span>
+                  <span className="text-text-primary">{formatDate(plugin.updatedAt)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-secondary">语言</span>
+                  <span className="text-text-primary truncate max-w-[10rem]">
+                    {(plugin.languages || ['en']).join('、')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-text-secondary">分类</span>
                   <span className="text-text-primary capitalize">{plugin.category}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-text-secondary">安装量</span>
-                  <span className="text-text-primary">{plugin.installCount || 0}</span>
+                  <span className="text-text-primary">{formatCount(plugin.installCount || 0)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-text-secondary">评分</span>
-                  <span className="text-text-primary">{plugin.rating?.toFixed(1) || '0.0'} ⭐</span>
+                  <span className="text-text-primary flex items-center gap-1">
+                    {plugin.rating?.toFixed(1) || '0.0'}
+                    <Star className="w-3.5 h-3.5 text-star fill-star" />
+                  </span>
                 </div>
+                {plugin.githubRepo && (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-text-secondary">来源</span>
+                    <a
+                      href={plugin.githubRepo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline flex items-center gap-1"
+                    >
+                      GitHub
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
+                {plugin.tags?.length > 0 && (
+                  <>
+                    <div className="pt-3 mt-3 border-t border-border" />
+                    <div className="flex items-center gap-2 text-text-secondary">
+                      <Tag className="w-4 h-4" />
+                      <span className="text-xs">标签</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {plugin.tags.map((tag, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-1 bg-background border border-border rounded-full text-xs text-text-secondary"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-
-            {/* Tags */}
-            {plugin.tags?.length > 0 && (
-              <div className="bg-surface rounded-lg border border-border p-4">
-                <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  标签
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {plugin.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 bg-surface border border-border rounded-full text-xs text-text-secondary"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Developer info */}
             <div className="bg-surface rounded-lg border border-border p-4">
