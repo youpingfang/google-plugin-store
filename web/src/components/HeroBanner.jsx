@@ -47,7 +47,7 @@ function HeroBanner({ plugins = [] }) {
   // Pick up to 6 plugins with icons for the floating icon row
   const icons = plugins
     .filter((p) => p.icon)
-    .slice(0, 6);
+    .slice(0, 7);
 
   useEffect(() => {
     if (!playing) return;
@@ -77,7 +77,7 @@ function HeroBanner({ plugins = [] }) {
 
         {/* Floating plugin icons — the main attraction */}
         {icons.length > 0 && (
-          <div className="flex items-center justify-center gap-3 md:gap-4">
+          <div className="w-full flex items-center justify-center gap-4 md:gap-6">
             {icons.map((p) => (
               <HeroIcon key={p.id} plugin={p} />
             ))}
@@ -126,7 +126,7 @@ function HeroIcon({ plugin }) {
     <a
       href={plugin.crxUrl}
       download
-      className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white shadow-lg
+      className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white shadow-lg
                ring-1 ring-black/5 overflow-hidden flex items-center justify-center
                hover:-translate-y-1 transition-transform duration-200
                img-zoom"
