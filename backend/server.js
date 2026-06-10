@@ -7,7 +7,9 @@ import pluginsRouter from './routes/plugins.js';
 import githubRouter from './routes/github.js';
 import uploadRouter from './routes/upload.js';
 import authRouter from './routes/auth.js';
+import syncRouter from './routes/sync.js';
 import { initStorage } from './services/storage.js';
+import { startScheduler } from './services/sync.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -64,6 +66,7 @@ app.use('/api/plugins', pluginsRouter);
 app.use('/api/github', githubRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/sync', syncRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -81,6 +84,7 @@ if (IS_PROD) {
 
 // Initialize storage and start server
 await initStorage();
+startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Plugin Store API running on port ${PORT}`);

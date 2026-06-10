@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
+import {
   ArrowLeft, Star, Users, Download, Shield, ChevronDown, ChevronUp,
-  ExternalLink, Calendar, FileText, Tag
+  ExternalLink, Calendar, FileText, Tag, RefreshCw
 } from 'lucide-react';
 import { api } from '../api';
+import { useAuth } from '../hooks/useAuth.jsx';
 import PluginCard from '../components/PluginCard';
 import InstallGuide from '../components/InstallGuide';
 
@@ -33,6 +34,10 @@ function PluginDetail() {
   const [error, setError] = useState(null);
   const [showAllPermissions, setShowAllPermissions] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const { isAdmin } = useAuth();
+  const [syncing, setSyncing] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
+  const [syncMessage, setSyncMessage] = useState(null);
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [relatedPlugins, setRelatedPlugins] = useState([]);
 
@@ -64,7 +69,7 @@ function PluginDetail() {
     } catch (e) {
       console.error('Failed to record install:', e);
     }
-    
+
     // Trigger download — use display name + version for friendlier filename
     const safeName = (plugin.name || plugin.id).replace(/[\\/:*?"<>|\s]+/g, '-');
     const version = plugin.version || '1.0.0';
@@ -74,6 +79,32 @@ function PluginDetail() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleManualSync = async () => {
+    if (syncing) return;
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const result = await api.syncRunOne(id);
+      const item = result?.summary?.items?.[0];
+      if (!item) {
+        setSyncMessage({ type: 'error', text: '未拿到同步结果' });
+      } else if (item.action === 'updated') {
+        setSyncMessage({ type: 'success', text: `已从 ${item.from} 更新到 ${item.to}` });
+        setLastSyncedAt(new Date().toISOString());
+        loadPlugin();
+      } else if (item.action === 'skipped') {
+        setSyncMessage({ type: 'info', text: `已经是最新版本（${item.reason || ''}）` });
+        setLastSyncedAt(new Date().toISOString());
+      } else {
+        setSyncMessage({ type: 'error', text: `同步失败：${item.error || '未知错误'}` });
+      }
+    } catch (e) {
+      setSyncMessage({ type: 'error', text: e.message || '同步失败' });
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -197,17 +228,47 @@ function PluginDetail() {
               </div>
 
               {/* Install Button */}
-              <button
-                onClick={handleInstall}
-                className="mt-5 flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium
-                         rounded-lg hover:bg-primary-hover transition-colors shadow-sm"
-              >
-                <Download strokeWidth={2.5} className="w-5 h-5" />
-                下载并安装
-              </button>
+              <div className="mt-5 flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleInstall}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium
+                           rounded-lg hover:bg-primary-hover transition-colors shadow-sm"
+                >
+                  <Download strokeWidth={2.5} className="w-5 h-5" />
+                  下载并安装
+                </button>
+                {plugin.githubRepo && isAdmin && (
+                  <button
+                    onClick={handleManualSync}
+                    disabled={syncing}
+                    title="拉取 GitHub 最新版本并更新此插件"
+                    className="flex items-center gap-2 px-5 py-3 bg-surface text-text-primary
+                             font-medium rounded-lg border border-border hover:border-primary
+                             hover:text-primary transition-colors shadow-sm
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <RefreshCw strokeWidth={2.5} className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                    {syncing ? '同步中…' : '从 GitHub 更新'}
+                  </button>
+                )}
+              </div>
               <p className="mt-2 text-sm text-text-secondary">
                 下载后请看页面下方的《下载后如何安装？》说明。
+                {plugin.githubRepo && lastSyncedAt && (
+                  <> · 上次同步：{new Date(lastSyncedAt).toLocaleString('zh-CN')}</>
+                )}
               </p>
+              {syncMessage && (
+                <div
+                  className={`mt-2 text-sm px-3 py-2 rounded-lg ${
+                    syncMessage.type === 'success' ? 'bg-success/10 text-success' :
+                    syncMessage.type === 'info' ? 'bg-surface-2 text-text-secondary' :
+                    'bg-danger/10 text-danger'
+                  }`}
+                >
+                  {syncMessage.text}
+                </div>
+              )}
             </div>
           </div>
 

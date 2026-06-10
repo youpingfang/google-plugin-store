@@ -37,3 +37,7 @@ Thumbs.db
 
 # User database — contains bcrypt password hashes; keep local
 data/users.json
+
+# GitHub sync runtime artifacts
+data/sync_logs.json
+data/packages/_temp/

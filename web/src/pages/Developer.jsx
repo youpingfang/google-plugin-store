@@ -26,6 +26,37 @@ function getDevGradient(name) {
   return PLACEHOLDER_GRADIENTS[index];
 }
 
+// Reusable little icon tile used in the developer dashboard list.
+// Falls back to a gradient + first-letter tile if the icon URL
+// fails to load (404, slow CDN, etc).
+function PluginIcon({ plugin, size = 'md' }) {
+  const [err, setErr] = useState(false);
+  const has = plugin.icon && !err;
+  const SIZES = {
+    sm: ['w-10 h-10', 'text-base'],
+    md: ['w-12 h-12', 'text-lg'],
+    lg: ['w-14 h-14', 'text-xl'],
+  };
+  const [boxCls, textCls] = SIZES[size] || SIZES.md;
+  return (
+    <div className={`${boxCls} shrink-0 rounded-xl overflow-hidden shadow-sm`}>
+      {has ? (
+        <img
+          src={plugin.icon}
+          alt=""
+          onError={() => setErr(true)}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className={`w-full h-full bg-gradient-to-br ${getDevGradient(plugin.name)}
+                       flex items-center justify-center text-white font-bold ${textCls}`}>
+          {(plugin.name || '?').charAt(0).toUpperCase()}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const CATEGORIES = [
   { id: 'tools', name: '工具类' },
   { id: 'entertainment', name: '娱乐类' },
@@ -303,17 +334,7 @@ function Developer() {
                 <div className="divide-y divide-border">
                   {plugins.slice(0, 5).map((plugin) => (
                     <div key={plugin.id} className="px-6 py-4 flex items-center gap-4">
-                      <div className="w-12 h-12 shrink-0">
-                        {plugin.icon ? (
-                          <div className="w-full h-full rounded-xl overflow-hidden shadow-sm">
-                            <img src={plugin.icon} alt="" className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className={`w-full h-full rounded-xl bg-gradient-to-br ${getDevGradient(plugin.name)} flex items-center justify-center shadow-sm`}>
-                            <span className="text-white font-bold text-lg">{plugin.name.charAt(0).toUpperCase()}</span>
-                          </div>
-                        )}
-                      </div>
+                      <PluginIcon plugin={plugin} size="md" />
                       <div className="flex-1">
                         <p className="font-medium text-text-primary">{plugin.name}</p>
                         <p className="text-sm text-text-secondary">v{plugin.version} · {plugin.installCount || 0} 安装</p>
@@ -348,17 +369,7 @@ function Developer() {
                 <div className="bg-surface rounded-xl border border-border">
                   {plugins.map((plugin, i) => (
                     <div key={plugin.id} className={`px-6 py-4 flex items-center gap-4 ${i > 0 ? 'border-t border-border' : ''}`}>
-                      <div className="w-14 h-14 shrink-0">
-                        {plugin.icon ? (
-                          <div className="w-full h-full rounded-xl overflow-hidden shadow-sm">
-                            <img src={plugin.icon} alt="" className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className={`w-full h-full rounded-xl bg-gradient-to-br ${getDevGradient(plugin.name)} flex items-center justify-center shadow-sm`}>
-                            <span className="text-white font-bold text-xl">{plugin.name.charAt(0).toUpperCase()}</span>
-                          </div>
-                        )}
-                      </div>
+                      <PluginIcon plugin={plugin} size="lg" />
                       <div className="flex-1">
                         <p className="font-semibold text-text-primary">{plugin.name}</p>
                         <p className="text-sm text-text-secondary">

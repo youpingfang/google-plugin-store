@@ -185,31 +185,53 @@ export async function downloadGitHubRepo(repoUrl, token = null) {
 /**
  * Find and extract manifest from downloaded GitHub ZIP
  */
+function tolerantJsonParse(text) {
+  const cleaned = text
+    // Strip line comments: // not inside a string
+    .replace(/(^|[^:"'])\/\/.*$/gm, '$1')
+    // Strip block comments
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    // Strip trailing commas before } or ]
+    .replace(/,(\s*[}\]])/g, '$1');
+  return JSON.parse(cleaned);
+}
+
 export async function extractManifestFromGitHubZip(zipPath) {
   const zip = new AdmZip(zipPath);
   const entries = zip.getEntries();
-  
-  // Find the root directory name
-  const rootEntry = entries[0];
-  const rootPrefix = rootEntry ? rootEntry.entryName.split('/')[0] + '/' : '';
-  
+
+  const stripPrefix = (name) => {
+    const parts = name.split('/');
+    return parts.length > 1 ? parts.slice(1).join('/') : name;
+  };
+
+  // 1. Look for a top-level manifest.json (or variant) under the
+  //    zip's root dir or directly at the top.
   for (const manifestName of MANIFEST_FILES) {
-    const fullPath = rootPrefix + manifestName;
-    const entry = entries.find(e => e.entryName === fullPath);
-    if (entry) {
-      const content = zip.readAsText(entry);
-      return JSON.parse(content);
+    for (const e of entries) {
+      const p = stripPrefix(e.entryName);
+      if (p === manifestName) {
+        try {
+          return tolerantJsonParse(zip.readAsText(e));
+        } catch { /* try next */ }
+      }
     }
   }
-  
-  // Also try without prefix
-  for (const manifestName of MANIFEST_FILES) {
-    const entry = entries.find(e => e.entryName === manifestName);
-    if (entry) {
-      const content = zip.readAsText(entry);
-      return JSON.parse(content);
+
+  // 2. Fall back: search up to 3 levels deep in any subdirectory
+  //    (some repos put manifest under platform/chromium/ etc).
+  for (const depth of [2, 3, 4]) {
+    for (const manifestName of MANIFEST_FILES) {
+      for (const e of entries) {
+        const p = stripPrefix(e.entryName);
+        if (p.endsWith('/' + manifestName) && p.split('/').length === depth) {
+          try {
+            return tolerantJsonParse(zip.readAsText(e));
+          } catch { /* try next */ }
+        }
+      }
     }
   }
-  
+
   return null;
 }

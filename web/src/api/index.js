@@ -124,4 +124,9 @@ export const api = {
   register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   loginPassword: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   githubLogin: (token) => request('/auth/github', { method: 'POST', body: JSON.stringify({ token }) }),
+
+  // GitHub sync
+  syncStatus: () => request('/sync/status'),
+  syncRun: () => request('/sync/run', { method: 'POST' }),
+  syncRunOne: (id) => request(`/sync/run/${encodeURIComponent(id)}`, { method: 'POST' }),
 };
