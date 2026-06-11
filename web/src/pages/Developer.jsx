@@ -86,9 +86,9 @@ function Developer() {
   // GitHub import
   const [githubUrl, setGithubUrl] = useState('');
   const [githubToken, setGithubToken] = useState('');
-  const [githubPreview, setGithubPreview] = useState(null);
-  const [detecting, setDetecting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState(null);
+  const [importedPlugin, setImportedPlugin] = useState(null);
 
   // Notifications
   const [notification, setNotification] = useState(null);
@@ -164,41 +164,39 @@ function Developer() {
   };
 
   const handleGithubDetect = async () => {
-    if (!githubUrl) return;
-
-    try {
-      setDetecting(true);
-      const data = await api.detectGitHub(githubUrl, githubToken || null);
-      setGithubPreview(data);
-    } catch (err) {
-      showNotification(err.message || '检测失败，请确认仓库地址和权限', 'error');
-      setGithubPreview(null);
-    } finally {
-      setDetecting(false);
-    }
+    // Deprecated: GitHub import is now a single-step action.
+    // Kept as a no-op so old references do not crash if any.
+    return;
   };
 
   const handleGithubImport = async () => {
-    if (!githubPreview) return;
-    
+    if (!githubUrl) return;
+
+    setImportError(null);
+    setImportedPlugin(null);
+
     try {
       setImporting(true);
-      await api.importGitHub({
+      const plugin = await api.importGitHub({
         repoUrl: githubUrl,
         token: githubToken || null,
-        category: githubPreview.category || 'tools',
-        shortDescription: githubPreview.description || ''
+        category: 'tools',
+        shortDescription: ''
       });
 
-      showNotification(`${githubPreview.name} 导入成功！`);
+      setImportedPlugin(plugin);
+      showNotification(`${plugin.name} 导入成功！`);
       setGithubUrl('');
-      setGithubPreview(null);
+      setGithubToken('');
       loadPlugins();
     } catch (err) {
-      const msg = err.status === 409
-        ? `插件已存在：${err.message.replace(/^.*?: /, '')}`
-        : (err.message || '导入失败');
-      showNotification(msg, 'error');
+      if (err.status === 409) {
+        // Duplicate: backend returns { error, existingId, existingName }
+        const existingName = (err.message || '').replace(/^.*?: /, '');
+        setImportError({ duplicate: true, existingName });
+      } else {
+        showNotification(err.message || '导入失败，请确认仓库地址和权限', 'error');
+      }
     } finally {
       setImporting(false);
     }
@@ -583,7 +581,7 @@ function Developer() {
                     <input
                       type="text"
                       value={githubUrl}
-                      onChange={(e) => { setGithubUrl(e.target.value); setGithubPreview(null); }}
+                      onChange={(e) => { setGithubUrl(e.target.value); setImportError(null); setImportedPlugin(null); }}
                       className="w-full px-4 py-2.5 border border-border rounded-lg
                                focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                       placeholder="https://github.com/user/repo 或 user/repo"
@@ -621,92 +619,67 @@ function Developer() {
                     </details>
                   </div>
                   <button
-                    onClick={handleGithubDetect}
-                    disabled={!githubUrl || detecting}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg
-                             hover:bg-primary-hover transition-colors disabled:opacity-50"
+                    onClick={handleGithubImport}
+                    disabled={!githubUrl || importing}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-success text-white font-medium rounded-lg
+                             hover:opacity-90 transition-colors disabled:opacity-50"
                   >
-                    {detecting ? (
+                    {importing ? (
                       <>
                         <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
-                        检测中...
+                        导入中...
                       </>
                     ) : (
                       <>
-                        <Search strokeWidth={2.5} className="w-5 h-5" />
-                        检测插件信息
+                        <Github strokeWidth={2.5} className="w-5 h-5" />
+                        导入插件
                       </>
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Preview */}
-              {githubPreview && (
-                <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl">
-                  {githubPreview.duplicate ? (
-                    <>
-                      <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-                        <AlertTriangle strokeWidth={2.5} className="w-5 h-5 text-warning" />
-                        插件已存在
-                      </h3>
-                      <p className="text-sm text-text-secondary mb-4">
-                        该 GitHub 仓库已被导入为插件：<span className="font-medium text-text-primary">{githubPreview.existingName}</span>。不能重复导入。
-                      </p>
-                      <a
-                        href={`/plugin/${githubPreview.existingId}`}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors"
-                      >
-                        <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
-                        查看已存在的插件
-                      </a>
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-                        <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
-                        检测到插件
-                      </h3>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex items-center gap-4">
-                          <span className="text-text-secondary w-16">名称</span>
-                          <span className="font-medium text-text-primary">{githubPreview.name}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-text-secondary w-16">作者</span>
-                          <span className="text-text-primary">{githubPreview.owner}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-text-secondary w-16">版本</span>
-                          <span className="text-text-primary">{githubPreview.version}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-text-secondary w-16">描述</span>
-                          <span className="text-text-primary">{githubPreview.description || '无'}</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleGithubImport}
-                        disabled={importing}
-                        className="mt-5 flex items-center gap-2 px-6 py-3 bg-success text-white font-medium rounded-lg
-                                 hover:opacity-90 transition-colors disabled:opacity-50"
-                      >
-                        {importing ? (
-                          <>
-                            <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
-                            导入中...
-                          </>
-                        ) : (
-                          <>
-                            <Github strokeWidth={2.5} className="w-5 h-5" />
-                            确认导入
-                          </>
-                        )}
-                      </button>
-                    </>
-                  )}
+              {/* Duplicate warning (shown after backend 409) */}
+              {importError && importError.duplicate && (
+                <div className="bg-surface rounded-xl border border-warning/40 p-6 w-full max-w-2xl">
+                  <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                    <AlertTriangle strokeWidth={2.5} className="w-5 h-5 text-warning" />
+                    插件已存在
+                  </h3>
+                  <p className="text-sm text-text-secondary mb-4">
+                    该 GitHub 仓库已被导入为插件：<span className="font-medium text-text-primary">{importError.existingName}</span>。不能重复导入。
+                  </p>
+                  <a
+                    href={`/plugin/${importError.existingId}`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors"
+                  >
+                    <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
+                    查看已存在的插件
+                  </a>
                 </div>
               )}
+
+              {/* Success preview (after import) */}
+              {importedPlugin && (
+                <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl">
+                  <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                    <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
+                    导入成功
+                  </h3>
+                  <p className="text-sm text-text-secondary mb-4">
+                    <span className="font-medium text-text-primary">{importedPlugin.name}</span> v{importedPlugin.version}
+                  </p>
+                  <a
+                    href={`/plugin/${importedPlugin.id}`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors"
+                  >
+                    <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
+                    查看插件详情
+                  </a>
+                </div>
+              )}
+
+              {/* Legacy preview block removed — GitHub import is now a single-step action. */}
             </div>
           )}
         </main>
