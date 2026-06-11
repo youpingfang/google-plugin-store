@@ -248,9 +248,9 @@ function Home() {
                   items: featured,
                   gradient: 'from-amber-400 to-orange-500',
                   action: (
-                    <a href="/developer?action=add" className="text-sm text-primary hover:text-primary-hover
-                                                          flex items-center gap-1 group">
-                      全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <a href="/developer?action=add" className="text-base text-text-primary hover:text-text-secondary
+                                                          flex items-center gap-1 group font-medium">
+                      查看全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
                 })}
@@ -262,8 +262,8 @@ function Home() {
                   items: recent,
                   gradient: 'from-blue-500 to-cyan-500',
                   action: (
-                    <a href="/?sort=updated" className="text-sm text-primary hover:text-primary-hover
-                                                    flex items-center gap-1 group">
+                    <a href="/?sort=updated" className="text-base text-text-primary hover:text-text-secondary
+                                                    flex items-center gap-1 group font-medium">
                       查看全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
@@ -276,8 +276,8 @@ function Home() {
                   items: topRated,
                   gradient: 'from-purple-500 to-pink-500',
                   action: (
-                    <a href="/?sort=rating" className="text-sm text-primary hover:text-primary-hover
-                                                   flex items-center gap-1 group">
+                    <a href="/?sort=rating" className="text-base text-text-primary hover:text-text-secondary
+                                                   flex items-center gap-1 group font-medium">
                       查看全部 <ArrowRight strokeWidth={2.5} className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                   ),
