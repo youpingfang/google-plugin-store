@@ -6,7 +6,7 @@ services:
     ports:
       - "3005:3000"
     volumes:
-      - /root/dockerdata/google-plugin-store/data:/app/data
+      - ./data:/app/data
     environment:
       - NODE_ENV=production
       - PORT=3000
