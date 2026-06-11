@@ -569,7 +569,7 @@ function Developer() {
 
           {/* GitHub import */}
           {activeTab === 'github' && (
-            <div className="flex flex-col items-center">
+            <div>
               <h2 className="text-2xl font-bold text-text-primary mb-6">从 GitHub 导入</h2>
 
               <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl mb-6">
