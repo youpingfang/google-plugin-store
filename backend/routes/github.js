@@ -37,7 +37,15 @@ router.post('/import', requireAuth, async (req, res) => {
     
     // Download repo as ZIP
     const { tempZip, owner, repo } = await downloadGitHubRepo(repoUrl, token || null);
-    
+
+    // Detect repo metadata (for readme etc.). Best-effort: do not fail import on detect errors.
+    let detectResult = null;
+    try {
+      detectResult = await detectGitHubRepo(repoUrl, token || null);
+    } catch (e) {
+      console.warn('detectGitHubRepo failed during import:', e.message);
+    }
+
     // Extract manifest
     const manifest = await extractManifestFromGitHubZip(tempZip);
     if (!manifest) {
