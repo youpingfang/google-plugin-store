@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { detectGitHubRepo, downloadGitHubRepo, extractManifestFromGitHubZip } from '../services/github.js';
+import { getPlugins } from '../services/storage.js';
 import { processGitHubPlugin } from '../services/converter.js';
 import { savePlugin } from '../services/storage.js';
 import { requireAuth } from '../services/auth.js';
@@ -19,6 +20,16 @@ router.post('/detect', async (req, res) => {
     }
     
     const info = await detectGitHubRepo(repoUrl, token || null);
+
+    // Duplicate check: same GitHub repo already imported?
+    const normalizedRepoUrl = repoUrl.replace(/\.git$/, '').replace(/\/$/, '').toLowerCase();
+    const existing = (await getPlugins()).find(
+      (p) => p.githubRepo && p.githubRepo.replace(/\.git$/, '').replace(/\/$/, '').toLowerCase() === normalizedRepoUrl
+    );
+    if (existing) {
+      return res.json({ ...info, duplicate: true, existingId: existing.id, existingName: existing.name });
+    }
+
     res.json(info);
   } catch (err) {
     console.error('Error detecting GitHub repo:', err);
@@ -48,6 +59,20 @@ router.post('/import', requireAuth, async (req, res) => {
 
     // Extract manifest
     const manifest = await extractManifestFromGitHubZip(tempZip);
+
+    // Duplicate check: same GitHub repo already imported?
+    const normalizedRepoUrl = repoUrl.replace(/\.git$/, '').replace(/\/$/, '').toLowerCase();
+    const existing = (await getPlugins()).find(
+      (p) => p.githubRepo && p.githubRepo.replace(/\.git$/, '').replace(/\/$/, '').toLowerCase() === normalizedRepoUrl
+    );
+    if (existing) {
+      await fs.remove(tempZip);
+      return res.status(409).json({
+        error: `插件已存在: ${existing.name}`,
+        existingId: existing.id,
+        existingName: existing.name,
+      });
+    }
     if (!manifest) {
       await fs.remove(tempZip);
       throw new Error('No manifest.json found in repository');

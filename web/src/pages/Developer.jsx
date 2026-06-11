@@ -3,7 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Plus, Github, Settings, 
   Upload, Search, Trash2, Edit, ChevronDown, X, Loader2,
-  AlertCircle, CheckCircle, ExternalLink, Shield
+  AlertCircle, CheckCircle, ExternalLink, Shield, AlertTriangle
 } from 'lucide-react';
 import { api } from '../api';
 import { useAuth } from '../hooks/useAuth.jsx';
@@ -165,7 +165,7 @@ function Developer() {
 
   const handleGithubDetect = async () => {
     if (!githubUrl) return;
-    
+
     try {
       setDetecting(true);
       const data = await api.detectGitHub(githubUrl, githubToken || null);
@@ -189,13 +189,16 @@ function Developer() {
         category: githubPreview.category || 'tools',
         shortDescription: githubPreview.description || ''
       });
-      
+
       showNotification(`${githubPreview.name} 导入成功！`);
       setGithubUrl('');
       setGithubPreview(null);
       loadPlugins();
     } catch (err) {
-      showNotification(err.message || '导入失败', 'error');
+      const msg = err.status === 409
+        ? `插件已存在：${err.message.replace(/^.*?: /, '')}`
+        : (err.message || '导入失败');
+      showNotification(msg, 'error');
     } finally {
       setImporting(false);
     }
@@ -641,46 +644,67 @@ function Developer() {
               {/* Preview */}
               {githubPreview && (
                 <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl">
-                  <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
-                    检测到插件
-                  </h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-4">
-                      <span className="text-text-secondary w-16">名称</span>
-                      <span className="font-medium text-text-primary">{githubPreview.name}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-text-secondary w-16">作者</span>
-                      <span className="text-text-primary">{githubPreview.owner}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-text-secondary w-16">版本</span>
-                      <span className="text-text-primary">{githubPreview.version}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-text-secondary w-16">描述</span>
-                      <span className="text-text-primary">{githubPreview.description || '无'}</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleGithubImport}
-                    disabled={importing}
-                    className="mt-5 flex items-center gap-2 px-6 py-3 bg-success text-white font-medium rounded-lg
-                             hover:opacity-90 transition-colors disabled:opacity-50"
-                  >
-                    {importing ? (
-                      <>
-                        <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
-                        导入中...
-                      </>
-                    ) : (
-                      <>
-                        <Github strokeWidth={2.5} className="w-5 h-5" />
-                        确认导入
-                      </>
-                    )}
-                  </button>
+                  {githubPreview.duplicate ? (
+                    <>
+                      <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                        <AlertTriangle strokeWidth={2.5} className="w-5 h-5 text-warning" />
+                        插件已存在
+                      </h3>
+                      <p className="text-sm text-text-secondary mb-4">
+                        该 GitHub 仓库已被导入为插件：<span className="font-medium text-text-primary">{githubPreview.existingName}</span>。不能重复导入。
+                      </p>
+                      <a
+                        href={`/plugin/${githubPreview.existingId}`}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors"
+                      >
+                        <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
+                        查看已存在的插件
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+                        <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
+                        检测到插件
+                      </h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex items-center gap-4">
+                          <span className="text-text-secondary w-16">名称</span>
+                          <span className="font-medium text-text-primary">{githubPreview.name}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-text-secondary w-16">作者</span>
+                          <span className="text-text-primary">{githubPreview.owner}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-text-secondary w-16">版本</span>
+                          <span className="text-text-primary">{githubPreview.version}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-text-secondary w-16">描述</span>
+                          <span className="text-text-primary">{githubPreview.description || '无'}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleGithubImport}
+                        disabled={importing}
+                        className="mt-5 flex items-center gap-2 px-6 py-3 bg-success text-white font-medium rounded-lg
+                                 hover:opacity-90 transition-colors disabled:opacity-50"
+                      >
+                        {importing ? (
+                          <>
+                            <Loader2 strokeWidth={2.5} className="w-5 h-5 animate-spin" />
+                            导入中...
+                          </>
+                        ) : (
+                          <>
+                            <Github strokeWidth={2.5} className="w-5 h-5" />
+                            确认导入
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
