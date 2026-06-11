@@ -10,5 +10,4 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-    restart: unless-stopped
+    restart: always
