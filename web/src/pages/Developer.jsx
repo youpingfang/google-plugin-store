@@ -86,6 +86,40 @@ function Developer() {
   // GitHub import
   const [githubUrl, setGithubUrl] = useState('');
   const [githubToken, setGithubToken] = useState('');
+  const [githubCategory, setGithubCategory] = useState('tools');
+
+  // Edit plugin modal
+  const [editingPlugin, setEditingPlugin] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', category: 'tools', shortDescription: '', description: '' });
+  const [editSaving, setEditSaving] = useState(false);
+
+  const openEdit = (plugin) => {
+    setEditingPlugin(plugin);
+    setEditForm({
+      name: plugin.name || '',
+      category: plugin.category || 'tools',
+      shortDescription: plugin.shortDescription || '',
+      description: plugin.description || ''
+    });
+  };
+  const closeEdit = () => {
+    setEditingPlugin(null);
+    setEditForm({ name: '', category: 'tools', shortDescription: '', description: '' });
+  };
+  const handleEditSave = async () => {
+    if (!editingPlugin) return;
+    setEditSaving(true);
+    try {
+      await api.updatePlugin(editingPlugin.id, editForm);
+      showNotification(`${editForm.name} 已更新`);
+      closeEdit();
+      loadPlugins();
+    } catch (err) {
+      showNotification(err.message || '更新失败', 'error');
+    } finally {
+      setEditSaving(false);
+    }
+  };
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState(null);
   const [importedPlugin, setImportedPlugin] = useState(null);
@@ -180,7 +214,7 @@ function Developer() {
       const plugin = await api.importGitHub({
         repoUrl: githubUrl,
         token: githubToken || null,
-        category: 'tools',
+        category: githubCategory,
         shortDescription: ''
       });
 
@@ -188,6 +222,7 @@ function Developer() {
       showNotification(`${plugin.name} 导入成功！`);
       setGithubUrl('');
       setGithubToken('');
+      setGithubCategory('tools');
       loadPlugins();
     } catch (err) {
       if (err.status === 409) {
@@ -392,12 +427,21 @@ function Developer() {
                       <div className="flex items-center gap-2">
                         <Link to={`/plugin/${plugin.id}`}
                           className="p-2 text-text-secondary hover:text-primary hover:bg-surface rounded-lg transition-colors"
+                          title="查看"
                         >
                           <ExternalLink strokeWidth={2.5} className="w-5 h-5" />
                         </Link>
                         <button
+                          onClick={() => openEdit(plugin)}
+                          className="p-2 text-text-secondary hover:text-primary hover:bg-surface rounded-lg transition-colors"
+                          title="编辑"
+                        >
+                          <Edit strokeWidth={2.5} className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => handleDelete(plugin)}
                           className="p-2 text-text-secondary hover:text-danger hover:bg-surface rounded-lg transition-colors"
+                          title="删除"
                         >
                           <Trash2 strokeWidth={2.5} className="w-5 h-5" />
                         </button>
@@ -588,6 +632,21 @@ function Developer() {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      分类 <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      value={githubCategory}
+                      onChange={(e) => setGithubCategory(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-border rounded-lg
+                               focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <details className="group">
                       <summary className="flex items-center gap-1.5 cursor-pointer text-sm font-medium text-text-secondary hover:text-text-primary select-none">
                         <svg
@@ -684,6 +743,108 @@ function Developer() {
           )}
         </main>
       </div>
+
+      {/* Edit plugin modal */}
+      {editingPlugin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-background rounded-2xl border border-border shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h3 className="text-lg font-bold text-text-primary">编辑插件</h3>
+              <button
+                onClick={closeEdit}
+                className="p-1 text-text-secondary hover:text-text-primary transition-colors"
+              >
+                <X strokeWidth={2.5} className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  插件名称 <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-border rounded-lg
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  分类 <span className="text-danger">*</span>
+                </label>
+                <select
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-border rounded-lg
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  简介
+                </label>
+                <input
+                  type="text"
+                  maxLength={80}
+                  value={editForm.shortDescription}
+                  onChange={(e) => setEditForm({ ...editForm, shortDescription: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-border rounded-lg
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder="一句话描述插件功能（80字内）"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1.5">
+                  详细描述
+                </label>
+                <textarea
+                  rows={5}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-border rounded-lg
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder="详细介绍插件功能、使用场景等"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
+              <button
+                onClick={closeEdit}
+                className="px-4 py-2 text-text-secondary hover:text-text-primary font-medium rounded-lg
+                         hover:bg-surface transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleEditSave}
+                disabled={editSaving || !editForm.name}
+                className="px-5 py-2 bg-primary text-white font-medium rounded-lg
+                         hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {editSaving ? (
+                  <>
+                    <Loader2 strokeWidth={2.5} className="w-4 h-4 animate-spin" />
+                    保存中...
+                  </>
+                ) : (
+                  '保存'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
