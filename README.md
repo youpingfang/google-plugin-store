@@ -2,8 +2,6 @@
 
 一个自托管的浏览器插件商店 —— 抓取 GitHub 上的开源扩展，转换为 `.crx` / `.xpi`，集中展示并提供一键安装。
 
-> 镜像：`youpingfang/google-plugin-store` ｜ 版本：`1.5.19`
-
 ---
 
 ## ✨ 特性
@@ -29,21 +27,70 @@
 
 ## 🚀 快速开始
 
-### 1. 拉取镜像
+### 方式一：用 `docker-compose.yml` 直接部署（推荐）
+
+1. **创建项目目录**
 
 ```bash
-docker pull youpingfang/google-plugin-store:1.5.19
+mkdir google-plugin-store && cd google-plugin-store
 ```
 
-### 2. 启动
+2. **下载 compose 文件**
+
+```bash
+curl -O https://raw.githubusercontent.com/youpingfang/google-plugin-store/main/docker-compose.yml
+```
+
+> 或者手动新建 `docker-compose.yml`，内容如下：
+
+```yaml
+services:
+  google-plugin-store:
+    image: youpingfang/google-plugin-store:1.5.19
+    ports:
+      - "3005:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: always
+```
+
+3. **启动服务**
 
 ```bash
 docker compose up -d
 ```
 
-服务监听 `http://localhost:3005`。
+4. **访问**
 
-### 3. 数据持久化
+打开浏览器：http://localhost:3005
+
+5. **查看日志 / 停止 / 重启**
+
+```bash
+docker compose logs -f          # 实时日志
+docker compose stop             # 停止
+docker compose restart          # 重启
+docker compose down             # 停止并删除容器（数据保留在 ./data）
+```
+
+### 方式二：手动 docker run
+
+```bash
+docker pull youpingfang/google-plugin-store:1.5.19
+docker run -d \
+  --name google-plugin-store \
+  -p 3005:3000 \
+  -v $(pwd)/data:/app/data \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  --restart always \
+  youpingfang/google-plugin-store:1.5.19
+```
+
+### 数据持久化
 
 compose 中数据卷映射：
 
