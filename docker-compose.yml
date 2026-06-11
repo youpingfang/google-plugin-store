@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   google-plugin-store:
-    image: youpingfang/google-plugin-store:1.5.19
+    image: youpingfang/google-plugin-store:latest
     ports:
       - "3005:3000"
     volumes:
