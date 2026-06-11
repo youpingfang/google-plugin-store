@@ -568,10 +568,10 @@ function Developer() {
 
           {/* GitHub import */}
           {activeTab === 'github' && (
-            <div>
+            <div className="flex flex-col items-center">
               <h2 className="text-2xl font-bold text-text-primary mb-6">从 GitHub 导入</h2>
-              
-              <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl mb-6">
+
+              <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl mb-6">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
@@ -640,7 +640,7 @@ function Developer() {
 
               {/* Preview */}
               {githubPreview && (
-                <div className="bg-surface rounded-xl border border-border p-6 max-w-2xl">
+                <div className="bg-surface rounded-xl border border-border p-6 w-full max-w-2xl">
                   <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
                     <CheckCircle strokeWidth={2.5} className="w-5 h-5 text-success" />
                     检测到插件
