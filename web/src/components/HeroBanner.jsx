@@ -85,26 +85,36 @@ function HeroBanner({ plugins = [] }) {
         )}
       </div>
 
-      {/* Slide controls (bottom-right) */}
-      <div className="absolute bottom-4 right-4 flex items-center gap-1
-                    bg-black/30 backdrop-blur-sm rounded-full px-1 py-0.5">
-        <button
-          onClick={() => setSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length)}
-          className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
-          aria-label="上一张"
-        >
-          <ChevronLeft strokeWidth={2.5} className="w-4 h-4" />
-        </button>
+      {/* Prev / Next arrows — floating on the left & right, vertically centered */}
+      <button
+        onClick={() => setSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length)}
+        className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-10
+                   w-10 h-10 md:w-12 md:h-12 rounded-full
+                   bg-black/30 hover:bg-black/50 backdrop-blur-sm
+                   text-white flex items-center justify-center
+                   transition-colors shadow-md"
+        aria-label="上一张"
+      >
+        <ChevronLeft strokeWidth={2.5} className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+      <button
+        onClick={() => setSlide((s) => (s + 1) % SLIDES.length)}
+        className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-10
+                   w-10 h-10 md:w-12 md:h-12 rounded-full
+                   bg-black/30 hover:bg-black/50 backdrop-blur-sm
+                   text-white flex items-center justify-center
+                   transition-colors shadow-md"
+        aria-label="下一张"
+      >
+        <ChevronRight strokeWidth={2.5} className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+
+      {/* Bottom-right: counter + play/pause */}
+      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2
+                    bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
         <span className="text-white text-xs font-medium tabular-nums px-1">
           {slide + 1}/{SLIDES.length}
         </span>
-        <button
-          onClick={() => setSlide((s) => (s + 1) % SLIDES.length)}
-          className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"
-          aria-label="下一张"
-        >
-          <ChevronLeft strokeWidth={2.5} className="w-4 h-4 rotate-180" />
-        </button>
         <button
           onClick={() => setPlaying((p) => !p)}
           className="p-1.5 rounded-full text-white hover:bg-white/20 transition-colors"

@@ -131,7 +131,15 @@ export async function detectGitHubRepo(repoUrl, token = null) {
   
   // Get download URL (zipball)
   const downloadUrl = repoData.html_url + '/archive/refs/heads/' + defaultBranch + '.zip';
-  
+
+  // Try to fetch README.md (best-effort, do not fail the whole detect)
+  let readme = null;
+  try {
+    readme = await fetchGitHubReadme(owner, repo, defaultBranch, headers);
+  } catch (e) {
+    // silent: readme is optional
+  }
+
   return {
     name: manifest.name || repoData.name,
     description: manifest.description || repoData.description || '',
@@ -143,8 +151,34 @@ export async function detectGitHubRepo(repoUrl, token = null) {
     repo,
     defaultBranch,
     downloadUrl,
-    latestTag: null
+    latestTag: null,
+    readme
   };
+}
+
+/**
+ * Fetch README.md from a GitHub repo. Tries common filenames in the
+ * default branch, then falls back to the GitHub Contents API. Returns
+ * plain text or null.
+ */
+export async function fetchGitHubReadme(owner, repo, branch = 'main', baseHeaders = null) {
+  const headers = baseHeaders || { 'User-Agent': 'PluginStore' };
+  const names = ['README.md', 'readme.md', 'Readme.md', 'README.MD', 'README', 'README.txt'];
+  for (const name of names) {
+    try {
+      const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(name)}?ref=${encodeURIComponent(branch)}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.content) {
+        const text = Buffer.from(data.content, 'base64').toString('utf8');
+        if (text && text.trim()) return text;
+      }
+    } catch (e) {
+      // try next name
+    }
+  }
+  return null;
 }
 
 /**

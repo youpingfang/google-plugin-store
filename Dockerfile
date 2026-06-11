@@ -13,7 +13,7 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /app/backend
 
 # Install backend dependencies
 COPY backend/package*.json ./
@@ -23,7 +23,11 @@ RUN npm install
 COPY backend/ ./
 
 # Copy built frontend
-COPY --from=frontend /app/web/dist ./public
+# vite.config.js sets outDir to `../public` (relative to /app/web),
+# so the final bundle lands in /app/public inside the frontend stage.
+# Place it next to /app/backend so the existing `../public` path resolves
+# correctly from server.js.
+COPY --from=frontend /app/public /app/public
 
 # Create data directories
 RUN mkdir -p /app/data/packages && \

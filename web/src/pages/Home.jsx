@@ -243,8 +243,7 @@ function Home() {
               <>
                 {renderSection({
                   key: 'featured',
-                  title: '你玩，您可能会喜欢',
-                  subtitle: '编辑精选推荐',
+                  title: '您可能会喜欢',
                   icon: Sparkles,
                   items: featured,
                   gradient: 'from-amber-400 to-orange-500',
@@ -259,7 +258,6 @@ function Home() {
                 {renderSection({
                   key: 'recent',
                   title: '近期更新',
-                  subtitle: '保持最新，体验新功能',
                   icon: Clock,
                   items: recent,
                   gradient: 'from-blue-500 to-cyan-500',
@@ -274,7 +272,6 @@ function Home() {
                 {renderSection({
                   key: 'top',
                   title: '评分最高',
-                  subtitle: '用户好评如潮',
                   icon: Trophy,
                   items: topRated,
                   gradient: 'from-purple-500 to-pink-500',

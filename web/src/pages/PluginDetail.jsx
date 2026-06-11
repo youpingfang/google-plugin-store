@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ArrowLeft, Star, Users, Download, Shield, ChevronDown, ChevronUp,
-  ExternalLink, Calendar, FileText, Tag, RefreshCw
+  ArrowLeft, Star, Users, Download, ExternalLink, Calendar, FileText, Tag, RefreshCw
 } from 'lucide-react';
 import { api } from '../api';
 import { useAuth } from '../hooks/useAuth.jsx';
@@ -26,19 +25,179 @@ function getGradient(name) {
   return PLACEHOLDER_GRADIENTS[index];
 }
 
+// Lightweight markdown renderer for the README block.
+// Supports: # ## ### headings, **bold**, `code`, [text](url), - / * / 1. lists,
+// > blockquote, --- hr, blank-line paragraph breaks.
+// No external deps; intentionally minimal (we don't need full CommonMark).
+function RenderMarkdown({ text }) {
+  if (!text) return null;
+  const lines = text.replace(/\r\n/g, '\n').split('\n');
+
+  const blocks = [];
+  let i = 0;
+  let key = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Blank line
+    if (!line.trim()) { i++; continue; }
+
+    // Horizontal rule
+    if (/^---+\s*$/.test(line)) { blocks.push(<hr key={key++} className="my-3 border-border" />); i++; continue; }
+
+    // Heading 1-3
+    const h = line.match(/^(#{1,3})\s+(.+)$/);
+    if (h) {
+      const level = h[1].length;
+      const cls = level === 1 ? 'text-lg font-bold mt-3 mb-1' :
+                  level === 2 ? 'text-base font-semibold mt-3 mb-1' :
+                                'text-sm font-semibold mt-2 mb-1';
+      blocks.push(<div key={key++} className={cls}>{renderInline(h[2])}</div>);
+      i++; continue;
+    }
+
+    // Unordered list (- or *)
+    if (/^[-*]\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^[-*]\s+/, ''));
+        i++;
+      }
+      blocks.push(
+        <ul key={key++} className="list-disc pl-5 my-2 space-y-1">
+          {items.map((it, k) => <li key={k}>{renderInline(it)}</li>)}
+        </ul>
+      );
+      continue;
+    }
+
+    // Ordered list (1. 2. ...)
+    if (/^\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\.\s+/, ''));
+        i++;
+      }
+      blocks.push(
+        <ol key={key++} className="list-decimal pl-5 my-2 space-y-1">
+          {items.map((it, k) => <li key={k}>{renderInline(it)}</li>)}
+        </ol>
+      );
+      continue;
+    }
+
+    // Blockquote
+    if (/^>\s?/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^>\s?/.test(lines[i])) {
+        buf.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      blocks.push(
+        <blockquote key={key++} className="border-l-4 border-border pl-3 my-2 text-text-secondary">
+          {buf.map((q, k) => <div key={k}>{renderInline(q)}</div>)}
+        </blockquote>
+      );
+      continue;
+    }
+
+    // Paragraph: consume consecutive non-empty, non-special lines
+    const para = [];
+    while (i < lines.length && lines[i].trim() &&
+           !/^#{1,3}\s+/.test(lines[i]) &&
+           !/^[-*]\s+/.test(lines[i]) &&
+           !/^\d+\.\s+/.test(lines[i]) &&
+           !/^>\s?/.test(lines[i]) &&
+           !/^---+\s*$/.test(lines[i])) {
+      para.push(lines[i]);
+      i++;
+    }
+    blocks.push(
+      <p key={key++} className="my-2">{renderInline(para.join(' '))}</p>
+    );
+  }
+
+  return <div className="text-sm text-text-primary leading-relaxed">{blocks}</div>;
+}
+
+// Render inline markdown: **bold**, `code`, [text](url), images ![alt](url)
+function renderInline(text) {
+  if (!text) return null;
+  const parts = [];
+  let buf = '';
+  let i = 0;
+  let key = 0;
+
+  const flushBuf = () => {
+    if (buf) { parts.push(<span key={key++}>{buf}</span>); buf = ''; }
+  };
+
+  while (i < text.length) {
+    // Image ![alt](url)
+    if (text[i] === '!' && text[i + 1] === '[') {
+      const m = text.slice(i).match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
+      if (m) {
+        flushBuf();
+        parts.push(<img key={key++} src={m[2]} alt={m[1]} className="inline-block max-h-32 my-1 rounded" />);
+        i += m[0].length;
+        continue;
+      }
+    }
+    // Link [text](url)
+    if (text[i] === '[') {
+      const m = text.slice(i).match(/^\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
+      if (m) {
+        flushBuf();
+        const href = m[2];
+        const isExternal = /^https?:\/\//.test(href);
+        parts.push(
+          <a key={key++} href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener noreferrer' : undefined}
+             className="text-primary hover:underline">{m[1]}</a>
+        );
+        i += m[0].length;
+        continue;
+      }
+    }
+    // Bold **text**
+    if (text[i] === '*' && text[i + 1] === '*') {
+      const end = text.indexOf('**', i + 2);
+      if (end !== -1) {
+        flushBuf();
+        parts.push(<strong key={key++}>{renderInline(text.slice(i + 2, end))}</strong>);
+        i = end + 2;
+        continue;
+      }
+    }
+    // Inline code `text`
+    if (text[i] === '`') {
+      const end = text.indexOf('`', i + 1);
+      if (end !== -1) {
+        flushBuf();
+        parts.push(<code key={key++} className="px-1 py-0.5 bg-background border border-border rounded text-xs">{text.slice(i + 1, end)}</code>);
+        i = end + 1;
+        continue;
+      }
+    }
+    buf += text[i];
+    i++;
+  }
+  flushBuf();
+  return parts;
+}
+
 function PluginDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [plugin, setPlugin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAllPermissions, setShowAllPermissions] = useState(false);
+
   const [imgError, setImgError] = useState(false);
+  const [showFullReadme, setShowFullReadme] = useState(false);
   const { isAdmin } = useAuth();
   const [syncing, setSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [syncMessage, setSyncMessage] = useState(null);
-  const [showAllVersions, setShowAllVersions] = useState(false);
   const [relatedPlugins, setRelatedPlugins] = useState([]);
 
   useEffect(() => {
@@ -155,11 +314,6 @@ function PluginDetail() {
     );
   }
 
-  const permissions = plugin.manifest?.permissions || [];
-  const hostPermissions = plugin.manifest?.host_permissions || [];
-  const visiblePermissions = showAllPermissions ? permissions : permissions.slice(0, 3);
-  const visibleVersions = showAllVersions ? plugin.versions : (plugin.versions || []).slice(0, 3);
-
   return (
     <div>
       {/* Header */}
@@ -196,7 +350,7 @@ function PluginDetail() {
             </div>
 
             {/* Info */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-text-primary">{plugin.name}</h1>
               <p className="text-text-secondary mt-1">
                 <a 
@@ -248,14 +402,26 @@ function PluginDetail() {
                              disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <RefreshCw strokeWidth={2.5} className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                    {syncing ? '同步中…' : '从 GitHub 更新'}
+                    {syncing ? '同步中…' : '手动更新'}
                   </button>
+                )}
+                {plugin.githubRepo && (
+                  <a
+                    href={plugin.githubRepo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-3 bg-surface text-text-primary
+                             font-medium rounded-lg border border-border hover:border-primary
+                             hover:text-primary transition-colors shadow-sm"
+                  >
+                    <ExternalLink strokeWidth={2.5} className="w-4 h-4" />
+                    项目地址
+                  </a>
                 )}
               </div>
               <p className="mt-2 text-sm text-text-secondary">
-                下载后请看页面下方的《下载后如何安装？》说明。
                 {plugin.githubRepo && lastSyncedAt && (
-                  <> · 上次同步：{new Date(lastSyncedAt).toLocaleString('zh-CN')}</>
+                  <>上次同步：{new Date(lastSyncedAt).toLocaleString('zh-CN')}</>
                 )}
               </p>
               {syncMessage && (
@@ -280,45 +446,64 @@ function PluginDetail() {
               </p>
             </div>
           )}
-
-          {/* Developer info moved to main column top */}
-          {plugin.author && (
-            <div className="mt-6 bg-surface rounded-2xl border border-border p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-                  <span className="text-primary font-bold">{plugin.author.charAt(0).toUpperCase()}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-text-secondary">开发者</p>
-                  <a
-                    href={plugin.authorUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-text-primary hover:text-primary truncate block"
-                  >
-                    {plugin.author}
-                  </a>
-                </div>
-                <a
-                  href={plugin.authorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-text-secondary hover:text-primary"
-                >
-                  <ExternalLink strokeWidth={2.5} className="w-4 h-4" />
-                  GitHub
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-8">
+            {/* Readme */}
+            {(() => {
+              // Prefer the dedicated readme field (fetched from GitHub README.md).
+              // Fall back to description / shortDescription for legacy plugins.
+              const candidates = [
+                plugin.readme,
+                plugin.description,
+                plugin.shortDescription,
+              ];
+              const raw = candidates
+                .map((s) => (s || '').trim())
+                .find((s) => s && !/^__MSG_/i.test(s)) || '';
+              if (!raw) return null;
+              // Split into "lines" by sentence or by hard wraps, capped at ~80 chars per line
+              const wrapped = raw
+                .replace(/\r\n/g, '\n')
+                .split(/(\n|(?<=[。！？!?；;]))/)
+                .reduce((acc, seg) => {
+                  if (!seg) return acc;
+                  if (seg === '\n') { acc.push(''); return acc; }
+                  // Wrap by 80-char soft breaks
+                  let s = seg;
+                  while (s.length > 80) {
+                    acc.push(s.slice(0, 80));
+                    s = s.slice(80);
+                  }
+                  if (s) acc.push(s);
+                  return acc;
+                }, [])
+                .filter((l, i, arr) => !(l === '' && arr[i - 1] === ''));
+              if (wrapped.length === 0) return null;
+              const MAX_LINES = 10;
+              const isLong = wrapped.length > MAX_LINES;
+              const visible = showFullReadme ? wrapped : wrapped.slice(0, MAX_LINES);
+              return (
+                <section>
+                  <h2 className="text-lg font-semibold text-text-primary mb-4">项目说明</h2>
+                  <div className="bg-surface rounded-lg border border-border p-5">
+                    <RenderMarkdown text={visible.join('\n')} />
+                    {isLong && (
+                      <button
+                        onClick={() => setShowFullReadme(v => !v)}
+                        className="mt-3 text-sm text-primary hover:underline"
+                      >
+                        {showFullReadme ? '收起' : '展开插件详情'}
+                      </button>
+                    )}
+                  </div>
+                </section>
+              );
+            })()}
+
             {/* Screenshots */}
             {plugin.screenshots?.length > 0 && (
               <section>
@@ -337,156 +522,8 @@ function PluginDetail() {
             )}
 
             {/* Details moved to sidebar — see below */}
-            {/* Permissions */}
-            {(permissions.length > 0 || hostPermissions.length > 0) && (
-              <section>
-                <h2 className="text-lg font-semibold text-text-primary mb-4">权限说明</h2>
-                <div className="bg-surface rounded-lg border border-border p-4">
-                  <div className="flex items-start gap-3">
-                    <Shield strokeWidth={2.5} className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <div className="text-sm text-text-secondary">
-                      <p>此插件请求以下权限：</p>
-                      <ul className="mt-2 space-y-1.5">
-                        {[...visiblePermissions, ...hostPermissions].map((perm, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-primary mt-0.5">•</span>
-                            <span>{perm}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      {(permissions.length > 3 || hostPermissions.length > 0) && (
-                        <button
-                          onClick={() => setShowAllPermissions(!showAllPermissions)}
-                          className="mt-3 text-primary hover:underline flex items-center gap-1"
-                        >
-                          {showAllPermissions ? (
-                            <>
-                              <ChevronUp strokeWidth={2.5} className="w-4 h-4" />
-                              收起
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown strokeWidth={2.5} className="w-4 h-4" />
-                              显示全部权限
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
 
-            {/* Version History */}
-            {plugin.versions?.length > 0 && (
-              <section>
-                <h2 className="text-lg font-semibold text-text-primary mb-4">版本历史</h2>
-                <div className="space-y-3">
-                  {visibleVersions.map((ver, i) => (
-                    <div key={i} className="bg-surface rounded-lg border border-border p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium text-text-primary">v{ver.version}</span>
-                          <span className="text-sm text-text-secondary">{ver.date}</span>
-                        </div>
-                      </div>
-                      {ver.note && (
-                        <p className="mt-2 text-sm text-text-secondary">{ver.note}</p>
-                      )}
-                    </div>
-                  ))}
-                  {plugin.versions.length > 3 && (
-                    <button
-                      onClick={() => setShowAllVersions(!showAllVersions)}
-                      className="w-full py-2 text-sm text-primary hover:bg-surface rounded-lg transition-colors"
-                    >
-                      {showAllVersions ? '收起' : `查看全部 ${plugin.versions.length} 个版本`}
-                    </button>
-                  )}
-                </div>
-              </section>
-            )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Combined info card: details + category + stats + tags */}
-            <div className="bg-surface rounded-lg border border-border p-5">
-              <h3 className="font-semibold text-text-primary mb-4">详细信息</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">版本</span>
-                  <span className="text-text-primary font-medium">{plugin.version}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">大小</span>
-                  <span className="text-text-primary">{formatSize(plugin.size)}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">更新</span>
-                  <span className="text-text-primary">{formatDate(plugin.updatedAt)}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">语言</span>
-                  <span className="text-text-primary truncate max-w-[10rem]">
-                    {(plugin.languages || ['en']).join('、')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">分类</span>
-                  <span className="text-text-primary capitalize">{plugin.category}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">安装量</span>
-                  <span className="text-text-primary">{formatCount(plugin.installCount || 0)}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-secondary">评分</span>
-                  <span className="text-text-primary flex items-center gap-1">
-                    {plugin.rating?.toFixed(1) || '0.0'}
-                    <Star strokeWidth={2.5} className="w-3.5 h-3.5 text-star fill-star" />
-                  </span>
-                </div>
-                {plugin.githubRepo && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-text-secondary">来源</span>
-                    <a
-                      href={plugin.githubRepo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-1"
-                    >
-                      GitHub
-                      <ExternalLink strokeWidth={2.5} className="w-3 h-3" />
-                    </a>
-                  </div>
-                )}
-                {plugin.tags?.length > 0 && (
-                  <>
-                    <div className="pt-3 mt-3 border-t border-border" />
-                    <div className="flex items-center gap-2 text-text-secondary">
-                      <Tag strokeWidth={2.5} className="w-4 h-4" />
-                      <span className="text-xs">标签</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {plugin.tags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-1 bg-background border border-border rounded-full text-xs text-text-secondary"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Developer info moved to main column top */}
-          </div>
-        </div>
 
         {/* Install instructions */}
         <InstallGuide />
@@ -502,6 +539,7 @@ function PluginDetail() {
             </div>
           </section>
         )}
+        </div>
       </div>
     </div>
   );

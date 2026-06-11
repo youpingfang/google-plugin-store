@@ -64,7 +64,7 @@ const GUIDES = [
 
 function InstallGuide() {
   const [openId, setOpenId] = useState('chrome');
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
     <section className="mt-8 bg-surface border border-border rounded-2xl overflow-hidden">

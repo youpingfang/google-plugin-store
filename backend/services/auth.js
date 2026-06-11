@@ -21,7 +21,7 @@ export async function verifyGitHubToken(pat) {
     headers: {
       'Authorization': `Bearer ${pat}`,
       'Accept': 'application/vnd.github+json',
-      'User-Agent': 'plugin-store',
+      'User-Agent': 'google-plugin-store',
     },
   });
   if (!res.ok) {

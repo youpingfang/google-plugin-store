@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  plugin-store:
-    build: .
+  google-plugin-store:
+    image: youpingfang/google-plugin-store:1.5.19
     ports:
       - "3005:3000"
     volumes:
-      - ./data:/app/data
+      - /root/dockerdata/google-plugin-store/data:/app/data
     environment:
       - NODE_ENV=production
       - PORT=3000

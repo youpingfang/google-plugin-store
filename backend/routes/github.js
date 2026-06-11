@@ -66,6 +66,7 @@ router.post('/import', requireAuth, async (req, res) => {
       category: category || 'tools',
       shortDescription: shortDescription || manifest.description || '',
       description: manifest.description || '',
+      readme: detectResult.readme || null,
       icon: `/packages/${id}/icon.png`,
       screenshots: [],
       crxUrl: `/packages/${id}/extension.crx`,

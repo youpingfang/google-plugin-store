@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
 import { savePlugin, getPlugins, getPluginById } from './storage.js';
-import { downloadGitHubRepo, extractManifestFromGitHubZip } from './github.js';
+import { downloadGitHubRepo, extractManifestFromGitHubZip, fetchGitHubReadme } from './github.js';
 import { processGitHubPlugin } from './converter.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -106,7 +106,7 @@ async function fetchLatestVersion(repoUrl) {
   const parsed = parseRepo(repoUrl);
   if (!parsed) return null;
   const { owner, repo } = parsed;
-  const headers = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'plugin-store-sync' };
+  const headers = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'google-plugin-store-sync' };
 
   // 1. Try latest release
   try {
@@ -145,7 +145,7 @@ async function reimportFromZipUrl(plugin, zipUrl, newVersion) {
   await fs.mkdir(tmpDir, { recursive: true });
   const tmpZip = join(tmpDir, `sync-${plugin.id}-${Date.now()}.zip`);
 
-  const res = await fetch(zipUrl, { headers: { 'User-Agent': 'plugin-store-sync' } });
+  const res = await fetch(zipUrl, { headers: { 'User-Agent': 'google-plugin-store-sync' } });
   if (!res.ok) throw new Error(`zip download failed: ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
   await fs.writeFile(tmpZip, buf);
@@ -168,6 +168,19 @@ async function reimportFromZipUrl(plugin, zipUrl, newVersion) {
   // uploadedAt, rating/ratingCount/installCount (we don't reset
   // social metrics on a sync).
   const freshSize = (await fs.stat(tmpZip)).size;
+  // Only fetch readme the first time; never overwrite an existing one
+  // (avoids hitting GitHub on every sync).
+  let readme = plugin.readme || null;
+  if (!readme && plugin.githubRepo) {
+    try {
+      const m = plugin.githubRepo.match(/github\.com\/([^\/]+)\/([^\/?#]+)/i);
+      if (m) {
+        readme = await fetchGitHubReadme(m[1], m[2].replace(/\.git$/, ''));
+      }
+    } catch (e) {
+      // ignore — readme is optional
+    }
+  }
   const updated = {
     ...plugin,
     name: manifest.name || plugin.name,
@@ -176,6 +189,7 @@ async function reimportFromZipUrl(plugin, zipUrl, newVersion) {
     shortDescription: (manifest.description || plugin.description || '').slice(0, 120),
     size: freshSize,
     manifest,
+    readme,
     updatedAt: new Date().toISOString(),
     versions: [
       { version: newVersion, date: new Date().toISOString().split('T')[0], note: 'Auto-synced from GitHub' },

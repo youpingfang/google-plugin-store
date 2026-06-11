@@ -1,5 +1,5 @@
 {
-  "name": "plugin-store-backend",
+  "name": "google-plugin-store-backend",
   "version": "1.5.11",
   "description": "Plugin Store Backend API",
   "main": "server.js",
